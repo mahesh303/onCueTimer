@@ -8,14 +8,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var timerManager = TimerManager()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        VStack(spacing: 0) {
+            // Top section with timer and controls
+            HStack(alignment: .top, spacing: 20) {
+                // Timer display area
+                TimerDisplayView(timerManager: timerManager)
+                    .frame(maxWidth: .infinity)
+                
+                // Control buttons
+                ControlPanel(timerManager: timerManager)
+            }
+            .padding()
         }
-        .padding()
     }
 }
 
