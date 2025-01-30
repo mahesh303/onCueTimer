@@ -4,77 +4,82 @@ struct TimerDisplayView: View {
     let timerManager: TimerManager
     @State private var message: String = ""
     @State private var displayMessage: String = ""
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Program Display")
-                .font(.headline)
-            
-            // Timer Display
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.2))
-                
-                VStack {
-                    Spacer()
-                        .frame(height: 20)  // Top padding
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Program Display")
+                        .font(.headline)
                     
-                    TimeDisplay(seconds: timerManager.settings.remainingSeconds, timerManager: timerManager)
+                    // Timer Display
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.gray.opacity(0.2))
+                        
+                        VStack {
+                            Spacer()
+                                .frame(height: 20)
+                            
+                            TimeDisplay(seconds: timerManager.settings.remainingSeconds, timerManager: timerManager)
+                                .frame(maxWidth: .infinity)
+                            
+                            Spacer()
+                            
+                            if !displayMessage.isEmpty {
+                                Text(displayMessage)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.gray.opacity(0.3))
+                                    .cornerRadius(8)
+                            }
+                        }
+                        .padding()
+                    }
+                    .frame(height: min(400, geometry.size.height * 0.4))
                     
-                    Spacer()  // This will push the time up and leave space below
+                    // Time Selection
+                    HStack {
+                        Text("select time")
+                        Spacer()
+                    }
                     
-                    // Message Display Area
-                    if !displayMessage.isEmpty {
-                        Text(displayMessage)
+                    TimePickerView(timerManager: timerManager)
+                        .frame(maxWidth: geometry.size.width * 0.8)
+                    
+                    // Message Input Area
+                    Text("Message Window")
+                        .font(.headline)
+                    
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(height: min(250, geometry.size.height * 0.3))
+                        
+                        TextEditor(text: $message)
+                            .frame(height: min(200, geometry.size.height * 0.25))
                             .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.gray.opacity(0.3))
-                            .cornerRadius(8)
+                    }
+                    
+                    // Message Controls
+                    HStack {
+                        Spacer()
+                        Button("Clear Message") {
+                            message = ""
+                            displayMessage = ""
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.yellow)
+                        
+                        Button("Send Message") {
+                            displayMessage = message
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.green)
                     }
                 }
                 .padding()
-            }
-            .frame(height: 400)  // Fixed height to ensure consistent spacing
-            
-            // Time Selection
-            HStack {
-                Text("select time")
-                Spacer()
-            }
-            
-            TimePickerView(timerManager: timerManager)
-            
-            Spacer()
-            
-            // Message Input Area
-            Text("Message Window")
-                .font(.headline)
-            
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 250)
-                
-                TextEditor(text: $message)
-                    .frame(height: 200)
-                    .padding()
-            }
-            
-            // Message Controls
-            HStack {
-                Spacer()
-                Button("Clear Message") {
-                    message = ""         // Clear the input message
-                    displayMessage = ""  // Clear the displayed message
-                }
-                .buttonStyle(.bordered)
-                .tint(.yellow)
-                
-                Button("Send Message") {
-                    displayMessage = message
-                }
-                .buttonStyle(.bordered)
-                .tint(.green)
             }
         }
     }

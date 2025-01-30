@@ -8,7 +8,7 @@ import SwiftUI
     var timerState: TimerState
     var presets: [Int: Int]
     
-    init(minutes: Int = 5) {
+    init(minutes: Int = 0) {
         let seconds = minutes * 60
         self.totalSeconds = seconds
         self.remainingSeconds = seconds
