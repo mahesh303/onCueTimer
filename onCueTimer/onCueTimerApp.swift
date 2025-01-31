@@ -11,7 +11,7 @@ import SwiftUI
 struct onCueTimerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(timerManager: TimerManager())
         }
     }
 }

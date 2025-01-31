@@ -1,8 +1,8 @@
 import Foundation
 
-@Observable final class TimerManager {
+class TimerManager: ObservableObject {
     private var timer: Timer?
-    var settings: TimerSettings
+    @Published var settings: TimerSettings
     
     // Add a property to track which preset is currently running
     private var activePresetNumber: Int? = nil
@@ -24,10 +24,10 @@ import Foundation
     }
     
     func pauseTimer() {
-        settings.isRunning = false
-        settings.timerState = .ready
         timer?.invalidate()
         timer = nil
+        settings.isRunning = false
+        settings.timerState = .ready
     }
     
     func resetTimer() {
@@ -38,13 +38,15 @@ import Foundation
     }
     
     private func updateTimer() {
-        settings.remainingSeconds -= 1
-        
-        // Update warning state based on remaining time
-        if settings.remainingSeconds <= 0 {
-            settings.timerState = .overtime
-        } else if settings.remainingSeconds <= 10 {
-            settings.timerState = .warning
+        DispatchQueue.main.async {
+            self.settings.remainingSeconds -= 1
+            
+            // Update warning state based on remaining time
+            if self.settings.remainingSeconds <= 0 {
+                self.settings.timerState = .overtime
+            } else if self.settings.remainingSeconds <= 10 {
+                self.settings.timerState = .warning
+            }
         }
     }
     
@@ -54,13 +56,15 @@ import Foundation
     }
     
     func setTime(seconds: Int) {
+        pauseTimer()  // Make sure to stop any running timer first
         settings.totalSeconds = seconds
-        resetTimer()
+        settings.remainingSeconds = seconds  // Make sure to set both
         
         // If setting to zero, ensure we're stopped
         if seconds == 0 {
             settings.timerState = .completed
-            pauseTimer()
+        } else {
+            settings.timerState = .ready
         }
     }
     

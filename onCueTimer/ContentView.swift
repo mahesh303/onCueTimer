@@ -8,9 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var timerManager = TimerManager()
+    let timerManager: TimerManager
     @State private var message = ""
     @State private var displayMessage = ""
+    
+    // Create DisplayManager here
+    private let displayManager: DisplayManager
+    
+    init(timerManager: TimerManager) {
+        self.timerManager = timerManager
+        self.displayManager = DisplayManager(timerManager: timerManager)
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -117,12 +125,14 @@ struct ContentView: View {
                             Button("Clear Message") {
                                 message = ""
                                 displayMessage = ""
+                                displayManager.message = ""  // Clear external display message
                             }
                             .buttonStyle(.bordered)
                             .tint(.yellow)
                             
                             Button("Send Message") {
                                 displayMessage = message
+                                displayManager.message = message  // Sync with external display
                                 // Dismiss keyboard after sending
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), 
                                                              to: nil, 
@@ -145,5 +155,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(timerManager: TimerManager())
 }
