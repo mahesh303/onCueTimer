@@ -11,6 +11,7 @@ struct ContentView: View {
     let timerManager: TimerManager
     @State private var message = ""
     @State private var displayMessage = ""
+    @State private var isTimerRunning = false
     
     // Create DisplayManager here
     private let displayManager: DisplayManager
@@ -70,17 +71,23 @@ struct ContentView: View {
                             
                             Button("STOP") {
                                 timerManager.pauseTimer()
+                                isTimerRunning = false
                             }
                             .buttonStyle(.bordered)
                             .tint(.red)
                             .frame(width: 300, height: 90)
                             .font(.title.bold())
                             
-                            Button("GO") {
-                                timerManager.startTimer()
+                            Button(isTimerRunning ? "PAUSE" : "GO") {
+                                if isTimerRunning {
+                                    timerManager.pauseTimer()
+                                } else {
+                                    timerManager.startTimer()
+                                }
+                                isTimerRunning.toggle()
                             }
                             .buttonStyle(.bordered)
-                            .tint(.green)
+                            .tint(isTimerRunning ? .yellow : .green)
                             .frame(width: 300, height: 90)
                             .font(.title.bold())
                         }
