@@ -7,13 +7,22 @@ class TimerManager: ObservableObject {
     // Add a property to track which preset is currently running
     private var activePresetNumber: Int? = nil
     
+    @Published var lastUsedDuration: Int = 0
+    
+    weak var displayManager: DisplayManager?
+    
     init(settings: TimerSettings = TimerSettings()) {
         self.settings = settings
     }
     
     func startTimer() {
+        // Update lastUsedDuration when starting the timer
+        lastUsedDuration = settings.remainingSeconds
         // Don't start if we're at zero
         guard settings.remainingSeconds > 0 else { return }
+        
+        // Clear the display message
+        displayManager?.message = ""
         
         settings.isRunning = true
         settings.timerState = .running
@@ -95,5 +104,21 @@ class TimerManager: ObservableObject {
     
     func canEditPreset(_ number: Int) -> Bool {
         return !isPresetActive(number)
+    }
+    
+    func repeatLastTimer() {
+        setTime(seconds: lastUsedDuration)
+    }
+    
+    func addTime(seconds: Int) {
+        let newTime = settings.remainingSeconds + seconds
+        settings.remainingSeconds = max(newTime, 0)
+        settings.totalSeconds = max(settings.totalSeconds, settings.remainingSeconds)
+    }
+    
+    func subtractTime(seconds: Int) {
+        let newTime = settings.remainingSeconds - seconds
+        settings.remainingSeconds = max(newTime, 0)
+        settings.totalSeconds = max(settings.totalSeconds, settings.remainingSeconds)
     }
 } 

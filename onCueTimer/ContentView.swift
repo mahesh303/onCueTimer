@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var message = ""
     @State private var displayMessage = ""
     @State private var isTimerRunning = false
+    @State private var presets: [String?] = Array(repeating: nil, count: 4)
     
     // Create DisplayManager here
     private let displayManager: DisplayManager
@@ -19,6 +20,7 @@ struct ContentView: View {
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
         self.displayManager = DisplayManager(timerManager: timerManager)
+        self.timerManager.displayManager = displayManager
     }
     
     var body: some View {
@@ -83,6 +85,7 @@ struct ContentView: View {
                                     timerManager.pauseTimer()
                                 } else {
                                     timerManager.startTimer()
+                                    displayMessage = ""
                                 }
                                 isTimerRunning.toggle()
                             }
@@ -90,28 +93,37 @@ struct ContentView: View {
                             .tint(isTimerRunning ? .yellow : .green)
                             .frame(width: 300, height: 90)
                             .font(.title.bold())
+                            
+                            Button("Repeat") {
+                                timerManager.repeatLastTimer()
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(.orange)
+                            .frame(width: 300, height: 90)
+                            .font(.title.bold())
                         }
                         .padding(.vertical, 10)
                         
                         Spacer()
                     }
-                    .frame(width: geometry.size.width * 0.4)
+                    .frame(width: geometry.size.width * 0.44)
                     
                     // Control panel (now only presets)
                     ControlPanel(timerManager: timerManager)
+                    
                 }
-                .padding()
+                .padding(.bottom, 280)
                 
                 // Right side: Time Selection and Message
                 VStack(alignment: .leading, spacing: 40) {
                     // Time Selection at the top
                     VStack(alignment: .leading) {
                         Text("select time")
-                            .padding(.bottom, 5)
+                            .padding(.bottom, 8)
                         TimePickerView(timerManager: timerManager)
                     }
                     
-                    // Message Area moved up, right below time selection
+                    // Message Area
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Message Window")
                             .font(.headline)
@@ -122,9 +134,40 @@ struct ContentView: View {
                             
                             TextEditor(text: $message)
                                 .padding()
-                                .frame(height: 120)  // Slightly smaller height
+                                .frame(height: 120)
                         }
-                        .frame(height: 120)  // Fixed container height
+                        .frame(height: 120)
+                        
+                        // Preset buttons
+                        HStack {
+                            ForEach(0..<4, id: \.self) { index in
+                                Button(action: {
+                                    if let preset = presets[index] {
+                                        message = preset
+                                    }
+                                }) {
+                                    VStack {
+                                        Text("Preset \(index + 1)")
+                                            .font(.caption)
+                                        
+                                        Image(systemName: "square.and.pencil")
+                                            .font(.system(size: 20))
+                                    }
+                                    .padding(8)
+                                    .background(presets[index] != nil ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(presets[index] != nil ? Color.green : Color.blue, lineWidth: 1)
+                                    )
+                                    .onTapGesture(count: 2) {
+                                        presets[index] = message
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.vertical, 8)
                         
                         // Message Controls
                         HStack {
@@ -132,15 +175,14 @@ struct ContentView: View {
                             Button("Clear Message") {
                                 message = ""
                                 displayMessage = ""
-                                displayManager.message = ""  // Clear external display message
+                                displayManager.message = ""
                             }
                             .buttonStyle(.bordered)
                             .tint(.yellow)
                             
                             Button("Send Message") {
                                 displayMessage = message
-                                displayManager.message = message  // Sync with external display
-                                // Dismiss keyboard after sending
+                                displayManager.message = message
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), 
                                                              to: nil, 
                                                              from: nil, 
@@ -151,7 +193,7 @@ struct ContentView: View {
                         }
                     }
                     
-                    Spacer() // Push everything up
+                    Spacer()
                 }
                 .frame(width: geometry.size.width * 0.4)
                 .padding()
