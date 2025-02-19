@@ -1,10 +1,10 @@
 import SwiftUI
 import UIKit
 
-class DisplayManager: ObservableObject {
+@Observable final class DisplayManager {
     var externalWindow: UIWindow?
     let timerManager: TimerManager
-    @Published var message: String = ""
+    var message: String = ""
     
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
@@ -12,10 +12,18 @@ class DisplayManager: ObservableObject {
     }
     
     private func setupExternalDisplayNotifications() {
+        // Observe both scene connection and disconnection
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleSceneConnectionChange),
             name: UIScene.didActivateNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSceneConnectionChange),
+            name: UIScene.didDisconnectNotification,
             object: nil
         )
         
@@ -24,22 +32,36 @@ class DisplayManager: ObservableObject {
     }
     
     private func setupExternalDisplay() {
-        guard let mainScene = UIApplication.shared.connectedScenes
-            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
+        // Clear any existing external window
+        externalWindow?.isHidden = true
+        externalWindow = nil
+        
+        // Get all active scenes
+        let scenes = UIApplication.shared.connectedScenes
+            .filter { $0.activationState == .foregroundActive }
+            .compactMap { $0 as? UIWindowScene }
+        
+        // Find the main scene (iPad display)
+        guard let mainScene = scenes.first(where: { scene in
+            // Main scene typically has a single window that's key and visible
+            if let windows = scene.windows as? [UIWindow],
+               let mainWindow = windows.first,
+               mainWindow.isKeyWindow {
+                return true
+            }
+            return false
+        }) else {
             return
         }
         
-        let externalScenes = UIApplication.shared.connectedScenes
-            .filter { $0.activationState == .foregroundActive }
-            .compactMap { $0 as? UIWindowScene }
-            .filter { $0 != mainScene }
-        
+        // Find external display scene
+        let externalScenes = scenes.filter { $0 != mainScene }
         guard let externalScene = externalScenes.first else {
             return
         }
         
+        // Create and setup external window
         let window = UIWindow(windowScene: externalScene)
-        
         let controller = UIHostingController(
             rootView: ExternalDisplayView(
                 timerManager: timerManager,
@@ -53,8 +75,9 @@ class DisplayManager: ObservableObject {
     }
     
     @objc private func handleSceneConnectionChange(_ notification: Notification) {
-        if notification.name == UIScene.didActivateNotification {
-            setupExternalDisplay()
+        // Add a small delay to ensure scene activation is complete
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.setupExternalDisplay()
         }
     }
     

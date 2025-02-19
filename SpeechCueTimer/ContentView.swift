@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  onCueTimer
+//  SpeechCueTimer
 //
 //  Created by Mahesh Patel on 1/29/25.
 //
@@ -9,18 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     let timerManager: TimerManager
-    @State private var message = ""
-    @State private var displayMessage = ""
-    @State private var isTimerRunning = false
-    @State private var presets: [String?] = Array(repeating: nil, count: 4)
-    
-    // Create DisplayManager here
-    private let displayManager: DisplayManager
+    let viewModel: ContentViewModel
     
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
-        self.displayManager = DisplayManager(timerManager: timerManager)
-        self.timerManager.displayManager = displayManager
+        self.viewModel = ContentViewModel(timerManager: timerManager)
     }
     
     var body: some View {
@@ -33,26 +26,30 @@ struct ContentView: View {
                         Text("Program Display")
                             .font(.headline)
                             .padding(.top)
+                            .accessibilityAddTraits(.isHeader)
                         
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.2))
                             
                             VStack {
-                                //Counter clock spacing
                                 Spacer()
                                     .frame(height: 20)
                                 
                                 TimeDisplay(seconds: timerManager.settings.remainingSeconds, timerManager: timerManager)
+                                    .accessibilityLabel("Timer")
+                                    .accessibilityValue(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
+                                    .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
                                 
                                 Spacer()
                                 
-                                if !displayMessage.isEmpty {
-                                    Text(displayMessage)
+                                if !viewModel.displayMessage.isEmpty {
+                                    Text(viewModel.displayMessage)
                                         .padding()
                                         .frame(maxWidth: .infinity)
                                         .background(Color.gray.opacity(0.3))
                                         .cornerRadius(8)
+                                        .accessibilityLabel("Display message")
                                 }
                                 
                                 Spacer()
@@ -61,56 +58,56 @@ struct ContentView: View {
                         }
                         .frame(height: geometry.size.height * 0.5)
                         
-                        // Control buttons moved here
-                        HStack(spacing: -190) {
+                        // Control buttons
+                        HStack(spacing: 16) {
                             Button("Clear") {
-                                timerManager.setTime(seconds: 0)
+                                viewModel.clearTimer()
                             }
                             .buttonStyle(.bordered)
                             .tint(.gray)
-                            .frame(width: 300, height: 90)  // 50% bigger (200 * 1.5 = 300, 60 * 1.5 = 90)
-                            .font(.title.bold())  // Increased font size to match larger buttons
+                            .frame(width: geometry.size.width * 0.08, height: 50)
+                            .font(.title3.bold())
+                            .accessibilityHint("Clear the timer")
                             
                             Button("STOP") {
-                                timerManager.pauseTimer()
-                                isTimerRunning = false
+                                viewModel.pauseTimer()
                             }
                             .buttonStyle(.bordered)
                             .tint(.red)
-                            .frame(width: 300, height: 90)
-                            .font(.title.bold())
+                            .frame(width: geometry.size.width * 0.08, height: 50)
+                            .font(.title3.bold())
+                            .accessibilityHint("Stop the timer")
                             
-                            Button(isTimerRunning ? "PAUSE" : "GO") {
-                                if isTimerRunning {
-                                    timerManager.pauseTimer()
+                            Button(viewModel.isTimerRunning ? "Pause" : "GO") {
+                                if viewModel.isTimerRunning {
+                                    viewModel.pauseTimer()
                                 } else {
-                                    timerManager.startTimer()
-                                    displayMessage = ""
+                                    viewModel.startTimer()
                                 }
-                                isTimerRunning.toggle()
                             }
                             .buttonStyle(.bordered)
-                            .tint(isTimerRunning ? .yellow : .green)
-                            .frame(width: 300, height: 90)
-                            .font(.title.bold())
+                            .tint(viewModel.isTimerRunning ? .yellow : .green)
+                            .frame(width: geometry.size.width * 0.08, height: 50)
+                            .font(.title3.bold())
+                            .accessibilityHint(viewModel.isTimerRunning ? "Pause the timer" : "Start the timer")
                             
                             Button("Repeat") {
-                                timerManager.repeatLastTimer()
+                                viewModel.repeatLastTimer()
                             }
                             .buttonStyle(.bordered)
                             .tint(.orange)
-                            .frame(width: 300, height: 90)
-                            .font(.title.bold())
+                            .frame(width: geometry.size.width * 0.08, height: 50)
+                            .font(.title3.bold())
+                            .accessibilityHint("Repeat the last timer duration")
                         }
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 16)
                         
                         Spacer()
                     }
                     .frame(width: geometry.size.width * 0.44)
                     
-                    // Control panel (now only presets)
+                    // Control panel
                     ControlPanel(timerManager: timerManager)
-                    
                 }
                 .padding(.bottom, 280)
                 
@@ -120,6 +117,7 @@ struct ContentView: View {
                     VStack(alignment: .leading) {
                         Text("select time")
                             .padding(.bottom, 8)
+                            .accessibilityAddTraits(.isHeader)
                         TimePickerView(timerManager: timerManager)
                     }
                     
@@ -127,44 +125,35 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Message Window")
                             .font(.headline)
+                            .accessibilityAddTraits(.isHeader)
                         
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.2))
                             
-                            TextEditor(text: $message)
-                                .padding()
-                                .frame(height: 120)
+                            TextField("Enter message", text: .init(
+                                get: { viewModel.message },
+                                set: { viewModel.message = $0 }
+                            ))
+                            .padding()
+                            .frame(height: 120)
+                            .accessibilityLabel("Message input")
                         }
                         .frame(height: 120)
                         
                         // Preset buttons
                         HStack {
                             ForEach(0..<4, id: \.self) { index in
-                                Button(action: {
-                                    if let preset = presets[index] {
-                                        message = preset
+                                PresetButton(
+                                    index: index,
+                                    hasPreset: viewModel.presets[index] != nil,
+                                    onSingleTap: {
+                                        viewModel.loadPreset(at: index)
+                                    },
+                                    onDoubleTap: {
+                                        viewModel.savePreset(at: index)
                                     }
-                                }) {
-                                    VStack {
-                                        Text("Preset \(index + 1)")
-                                            .font(.caption)
-                                        
-                                        Image(systemName: "square.and.pencil")
-                                            .font(.system(size: 20))
-                                    }
-                                    .padding(8)
-                                    .background(presets[index] != nil ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
-                                    .cornerRadius(8)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(presets[index] != nil ? Color.green : Color.blue, lineWidth: 1)
-                                    )
-                                    .onTapGesture(count: 2) {
-                                        presets[index] = message
-                                    }
-                                }
-                                .buttonStyle(.plain)
+                                )
                             }
                         }
                         .padding(.vertical, 8)
@@ -173,23 +162,18 @@ struct ContentView: View {
                         HStack {
                             Spacer()
                             Button("Clear Message") {
-                                message = ""
-                                displayMessage = ""
-                                displayManager.message = ""
+                                viewModel.clearMessage()
                             }
                             .buttonStyle(.bordered)
                             .tint(.yellow)
+                            .accessibilityHint("Clear the current message")
                             
                             Button("Send Message") {
-                                displayMessage = message
-                                displayManager.message = message
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), 
-                                                             to: nil, 
-                                                             from: nil, 
-                                                             for: nil)
+                                viewModel.sendMessage()
                             }
                             .buttonStyle(.bordered)
                             .tint(.green)
+                            .accessibilityHint("Send the current message to display")
                         }
                     }
                     
@@ -205,4 +189,47 @@ struct ContentView: View {
 
 #Preview {
     ContentView(timerManager: TimerManager())
+}
+
+struct PresetButton: View {
+    let index: Int
+    let hasPreset: Bool
+    let onSingleTap: () -> Void
+    let onDoubleTap: () -> Void
+    
+    @State private var timeoutTask: Task<Void, Never>?
+    
+    var body: some View {
+        VStack {
+            Text("Preset \(index + 1)")
+                .font(.caption)
+            
+            Image(systemName: "square.and.pencil")
+                .font(.system(size: 20))
+        }
+        .padding(8)
+        .background(hasPreset ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(hasPreset ? Color.green : Color.blue, lineWidth: 1)
+        )
+        .onTapGesture(count: 2) {
+            timeoutTask?.cancel()
+            onDoubleTap()
+        }
+        .onTapGesture(count: 1) {
+            timeoutTask?.cancel()
+            timeoutTask = Task {
+                try? await Task.sleep(nanoseconds: 300_000_000) // 300ms delay
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        onSingleTap()
+                    }
+                }
+            }
+        }
+        .accessibilityLabel("Message preset \(index + 1)")
+        .accessibilityHint("Double tap to save current message, single tap to load saved message")
+    }
 }

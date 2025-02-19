@@ -1,13 +1,14 @@
 import Foundation
+import SwiftUI
 
-class TimerManager: ObservableObject {
+@Observable final class TimerManager {
     private var timer: Timer?
-    @Published var settings: TimerSettings
+    var settings: TimerSettings
     
     // Add a property to track which preset is currently running
     private var activePresetNumber: Int? = nil
     
-    @Published var lastUsedDuration: Int = 0
+    var lastUsedDuration: Int = 0
     
     weak var displayManager: DisplayManager?
     

@@ -6,10 +6,11 @@ struct ControlPanel: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(alignment: .trailing, spacing: 12) {
-                Image("OCTlogo")
+                Image("SCTlogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 50)
+                    .cornerRadius(6.5)
                     .padding()
                 Spacer().frame(height: 44)
                 

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ExternalDisplayView: View {
     let timerManager: TimerManager
-    @ObservedObject var displayManager: DisplayManager
+    let displayManager: DisplayManager
     
     var body: some View {
         GeometryReader { geometry in

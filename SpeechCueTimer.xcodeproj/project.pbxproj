@@ -28,26 +28,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		413B28412D4AA6FE00F142F3 /* onCueTimer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = onCueTimer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		413B28512D4AA6FF00F142F3 /* onCueTimerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = onCueTimerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		413B285B2D4AA6FF00F142F3 /* onCueTimerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = onCueTimerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		413B28412D4AA6FE00F142F3 /* SpeechCueTimer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechCueTimer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		413B28512D4AA6FF00F142F3 /* SpeechCueTimerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechCueTimerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		413B285B2D4AA6FF00F142F3 /* SpeechCueTimerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechCueTimerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		41E1BDBA2D5BAB5600CBC571 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		413B28432D4AA6FE00F142F3 /* onCueTimer */ = {
+		413B28432D4AA6FE00F142F3 /* SpeechCueTimer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = onCueTimer;
+			path = SpeechCueTimer;
 			sourceTree = "<group>";
 		};
-		413B28542D4AA6FF00F142F3 /* onCueTimerTests */ = {
+		413B28542D4AA6FF00F142F3 /* SpeechCueTimerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = onCueTimerTests;
+			path = SpeechCueTimerTests;
 			sourceTree = "<group>";
 		};
-		413B285E2D4AA6FF00F142F3 /* onCueTimerUITests */ = {
+		413B285E2D4AA6FF00F142F3 /* SpeechCueTimerUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = onCueTimerUITests;
+			path = SpeechCueTimerUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -81,9 +81,9 @@
 		413B28382D4AA6FE00F142F3 = {
 			isa = PBXGroup;
 			children = (
-				413B28432D4AA6FE00F142F3 /* onCueTimer */,
-				413B28542D4AA6FF00F142F3 /* onCueTimerTests */,
-				413B285E2D4AA6FF00F142F3 /* onCueTimerUITests */,
+				413B28432D4AA6FE00F142F3 /* SpeechCueTimer */,
+				413B28542D4AA6FF00F142F3 /* SpeechCueTimerTests */,
+				413B285E2D4AA6FF00F142F3 /* SpeechCueTimerUITests */,
 				41E1BDB92D5BAB5600CBC571 /* Frameworks */,
 				413B28422D4AA6FE00F142F3 /* Products */,
 			);
@@ -92,9 +92,9 @@
 		413B28422D4AA6FE00F142F3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				413B28412D4AA6FE00F142F3 /* onCueTimer.app */,
-				413B28512D4AA6FF00F142F3 /* onCueTimerTests.xctest */,
-				413B285B2D4AA6FF00F142F3 /* onCueTimerUITests.xctest */,
+				413B28412D4AA6FE00F142F3 /* SpeechCueTimer.app */,
+				413B28512D4AA6FF00F142F3 /* SpeechCueTimerTests.xctest */,
+				413B285B2D4AA6FF00F142F3 /* SpeechCueTimerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -110,9 +110,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		413B28402D4AA6FE00F142F3 /* onCueTimer */ = {
+		413B28402D4AA6FE00F142F3 /* SpeechCueTimer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 413B28652D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "onCueTimer" */;
+			buildConfigurationList = 413B28652D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "SpeechCueTimer" */;
 			buildPhases = (
 				413B283D2D4AA6FE00F142F3 /* Sources */,
 				413B283E2D4AA6FE00F142F3 /* Frameworks */,
@@ -123,18 +123,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				413B28432D4AA6FE00F142F3 /* onCueTimer */,
+				413B28432D4AA6FE00F142F3 /* SpeechCueTimer */,
 			);
-			name = onCueTimer;
+			name = SpeechCueTimer;
 			packageProductDependencies = (
 			);
 			productName = onCueTimer;
-			productReference = 413B28412D4AA6FE00F142F3 /* onCueTimer.app */;
+			productReference = 413B28412D4AA6FE00F142F3 /* SpeechCueTimer.app */;
 			productType = "com.apple.product-type.application";
 		};
-		413B28502D4AA6FF00F142F3 /* onCueTimerTests */ = {
+		413B28502D4AA6FF00F142F3 /* SpeechCueTimerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 413B28682D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "onCueTimerTests" */;
+			buildConfigurationList = 413B28682D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "SpeechCueTimerTests" */;
 			buildPhases = (
 				413B284D2D4AA6FF00F142F3 /* Sources */,
 				413B284E2D4AA6FF00F142F3 /* Frameworks */,
@@ -146,18 +146,18 @@
 				413B28532D4AA6FF00F142F3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				413B28542D4AA6FF00F142F3 /* onCueTimerTests */,
+				413B28542D4AA6FF00F142F3 /* SpeechCueTimerTests */,
 			);
-			name = onCueTimerTests;
+			name = SpeechCueTimerTests;
 			packageProductDependencies = (
 			);
 			productName = onCueTimerTests;
-			productReference = 413B28512D4AA6FF00F142F3 /* onCueTimerTests.xctest */;
+			productReference = 413B28512D4AA6FF00F142F3 /* SpeechCueTimerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		413B285A2D4AA6FF00F142F3 /* onCueTimerUITests */ = {
+		413B285A2D4AA6FF00F142F3 /* SpeechCueTimerUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 413B286B2D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "onCueTimerUITests" */;
+			buildConfigurationList = 413B286B2D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "SpeechCueTimerUITests" */;
 			buildPhases = (
 				413B28572D4AA6FF00F142F3 /* Sources */,
 				413B28582D4AA6FF00F142F3 /* Frameworks */,
@@ -169,13 +169,13 @@
 				413B285D2D4AA6FF00F142F3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				413B285E2D4AA6FF00F142F3 /* onCueTimerUITests */,
+				413B285E2D4AA6FF00F142F3 /* SpeechCueTimerUITests */,
 			);
-			name = onCueTimerUITests;
+			name = SpeechCueTimerUITests;
 			packageProductDependencies = (
 			);
 			productName = onCueTimerUITests;
-			productReference = 413B285B2D4AA6FF00F142F3 /* onCueTimerUITests.xctest */;
+			productReference = 413B285B2D4AA6FF00F142F3 /* SpeechCueTimerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -201,7 +201,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 413B283C2D4AA6FE00F142F3 /* Build configuration list for PBXProject "onCueTimer" */;
+			buildConfigurationList = 413B283C2D4AA6FE00F142F3 /* Build configuration list for PBXProject "SpeechCueTimer" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -215,9 +215,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				413B28402D4AA6FE00F142F3 /* onCueTimer */,
-				413B28502D4AA6FF00F142F3 /* onCueTimerTests */,
-				413B285A2D4AA6FF00F142F3 /* onCueTimerUITests */,
+				413B28402D4AA6FE00F142F3 /* SpeechCueTimer */,
+				413B28502D4AA6FF00F142F3 /* SpeechCueTimerTests */,
+				413B285A2D4AA6FF00F142F3 /* SpeechCueTimerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -273,12 +273,12 @@
 /* Begin PBXTargetDependency section */
 		413B28532D4AA6FF00F142F3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 413B28402D4AA6FE00F142F3 /* onCueTimer */;
+			target = 413B28402D4AA6FE00F142F3 /* SpeechCueTimer */;
 			targetProxy = 413B28522D4AA6FF00F142F3 /* PBXContainerItemProxy */;
 		};
 		413B285D2D4AA6FF00F142F3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 413B28402D4AA6FE00F142F3 /* onCueTimer */;
+			target = 413B28402D4AA6FE00F142F3 /* SpeechCueTimer */;
 			targetProxy = 413B285C2D4AA6FF00F142F3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -410,7 +410,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"onCueTimer/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SpeechCueTimer/Preview Content\"";
 				DEVELOPMENT_TEAM = S86QF53NT3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -444,7 +444,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"onCueTimer/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SpeechCueTimer/Preview Content\"";
 				DEVELOPMENT_TEAM = S86QF53NT3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -486,7 +486,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/onCueTimer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/onCueTimer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpeechCueTimer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SpeechCueTimer";
 			};
 			name = Debug;
 		};
@@ -505,7 +505,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/onCueTimer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/onCueTimer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpeechCueTimer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SpeechCueTimer";
 			};
 			name = Release;
 		};
@@ -546,7 +546,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		413B283C2D4AA6FE00F142F3 /* Build configuration list for PBXProject "onCueTimer" */ = {
+		413B283C2D4AA6FE00F142F3 /* Build configuration list for PBXProject "SpeechCueTimer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				413B28632D4AA6FF00F142F3 /* Debug */,
@@ -555,7 +555,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		413B28652D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "onCueTimer" */ = {
+		413B28652D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "SpeechCueTimer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				413B28662D4AA6FF00F142F3 /* Debug */,
@@ -564,7 +564,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		413B28682D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "onCueTimerTests" */ = {
+		413B28682D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "SpeechCueTimerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				413B28692D4AA6FF00F142F3 /* Debug */,
@@ -573,7 +573,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		413B286B2D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "onCueTimerUITests" */ = {
+		413B286B2D4AA6FF00F142F3 /* Build configuration list for PBXNativeTarget "SpeechCueTimerUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				413B286C2D4AA6FF00F142F3 /* Debug */,
