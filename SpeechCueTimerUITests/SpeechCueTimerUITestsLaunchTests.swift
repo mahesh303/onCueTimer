@@ -1,6 +1,6 @@
 //
-//  onCueTimerUITestsLaunchTests.swift
-//  onCueTimerUITests
+//  SpeechCueTimerUITestsLaunchTests.swift
+//  SpeechCueTimerUITests
 //
 //  Created by Mahesh Patel on 1/29/25.
 //

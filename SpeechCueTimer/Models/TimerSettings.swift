@@ -20,7 +20,7 @@ import SwiftUI
     func getTimeColor() -> Color {
         if remainingSeconds > 10 {
             return .primary
-        } else if remainingSeconds > 5 {
+        } else if remainingSeconds > 0 {
             return .yellow
         } else {
             return .red
@@ -28,15 +28,19 @@ import SwiftUI
     }
     
     func formatTime(_ seconds: Int) -> String {
-        let h = seconds / 3600
-        let m = (seconds % 3600) / 60
-        let s = seconds % 60
+        let absSeconds = abs(seconds)
+        let h = absSeconds / 3600
+        let m = (absSeconds % 3600) / 60
+        let s = absSeconds % 60
         
+        let timeString: String
         if h > 0 {
-            return String(format: "%d:%02d:%02d", h, m, s)
+            timeString = String(format: "%d:%02d:%02d", h, m, s)
         } else {
-            return String(format: "%02d:%02d", m, s)
+            timeString = String(format: "%02d:%02d", m, s)
         }
+        
+        return seconds < 0 ? "-" + timeString : timeString
     }
     
     enum TimerState {
