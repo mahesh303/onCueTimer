@@ -16,7 +16,10 @@ import SwiftUI
         self.timerManager.displayManager = displayManager
 
         feedbackGenerator.prepare()
-        loadPresets()
+        // Initialize presets as blank - no loading from UserDefaults
+        presets = Array(repeating: nil, count: 4)
+        // Clear any existing preset data from UserDefaults to ensure clean state
+        clearOldPresetData()
     }
     
     // MARK: - Timer Controls
@@ -38,6 +41,14 @@ import SwiftUI
     
     func repeatLastTimer() {
         timerManager.repeatLastTimer()
+    }
+    
+    func zapMessage() {
+        // Only zap if there's a message displayed
+        guard !displayMessage.isEmpty else { return }
+        
+        NotificationCenter.default.post(name: .messageZap, object: nil)
+        feedbackGenerator.impactOccurred(intensity: 1.0)
     }
     
 
@@ -75,24 +86,14 @@ import SwiftUI
         guard !message.isEmpty else { return }
         
         presets[index] = message
-        savePresets()
+        // No longer saving to UserDefaults - presets are session-only
         feedbackGenerator.impactOccurred(intensity: 1.0)
     }
     
-    // MARK: - Persistence
+    // MARK: - UserDefaults Cleanup
     
-    private func loadPresets() {
-        if let savedPresets = UserDefaults.standard.stringArray(forKey: "messagePresets") {
-            // Convert [String] to [String?]
-            presets = savedPresets.map { $0.isEmpty ? nil : $0 }
-        } else {
-            presets = Array(repeating: nil, count: 4)
-        }
-    }
-    
-    private func savePresets() {
-        // Convert [String?] to [String] for UserDefaults
-        let presetsToSave = presets.map { $0 ?? "" }
-        UserDefaults.standard.set(presetsToSave, forKey: "messagePresets")
+    private func clearOldPresetData() {
+        // Remove any existing preset data from UserDefaults to ensure clean state
+        UserDefaults.standard.removeObject(forKey: "messagePresets")
     }
 } 
