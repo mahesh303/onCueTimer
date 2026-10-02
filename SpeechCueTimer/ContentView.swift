@@ -155,7 +155,7 @@ struct ContentView: View {
                 .padding(.bottom, 280)
                 
                 // Right side: Time Selection and Message
-                VStack(alignment: .leading, spacing: 40) {
+                VStack(alignment: .leading, spacing: 28) {
                     // Time Selection at the top
                     VStack(alignment: .leading) {
                         Text("select time")
@@ -163,7 +163,66 @@ struct ContentView: View {
                             .accessibilityAddTraits(.isHeader)
                         TimePickerView(timerManager: timerManager)
                     }
-                    
+
+                    // Warning threshold control
+                    // Lets the operator choose when the timer turns yellow —
+                    // e.g. "warn me when 2 minutes are left."
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.yellow)
+                            Text("Warn at")
+                                .font(.subheadline.bold())
+                            Text("(time remaining)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        HStack(spacing: 12) {
+                            // Decrease by 30s
+                            Button {
+                                timerManager.decreaseWarningThreshold()
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Decrease warning threshold by 30 seconds")
+                            .disabled(timerManager.settings.warningThresholdSeconds <= 10)
+
+                            // Current threshold displayed in mm:ss
+                            Text(timerManager.settings.formatTime(timerManager.settings.warningThresholdSeconds))
+                                .font(.system(.title3, design: .monospaced).bold())
+                                .foregroundColor(.yellow)
+                                .frame(minWidth: 70, alignment: .center)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.yellow.opacity(0.12))
+                                        .stroke(Color.yellow.opacity(0.4), lineWidth: 1)
+                                )
+                                .accessibilityLabel("Warning threshold: \(timerManager.settings.formatTime(timerManager.settings.warningThresholdSeconds))")
+
+                            // Increase by 30s
+                            Button {
+                                timerManager.increaseWarningThreshold()
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.yellow)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Increase warning threshold by 30 seconds")
+                            .disabled(timerManager.settings.warningThresholdSeconds >= 600)
+
+                            Text("steps: 30s  •  max: 10:00")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
                     // Message Area
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Message Window")

@@ -126,7 +126,7 @@ struct ExternalDisplayView: View {
     }
 
     private func getTimeColor(for seconds: Int) -> Color {
-        if seconds > 10 {
+        if seconds > timerManager.settings.warningThresholdSeconds {
             return .primary
         } else if seconds > 0 {
             return .yellow

@@ -7,7 +7,16 @@ import SwiftUI
     var isRunning: Bool
     var timerState: TimerState
     var presets: [Int: Int]
-    
+
+    // User-configurable threshold (in seconds) at which the timer turns yellow.
+    // Stored in UserDefaults so it survives app restarts.
+    // Range: 10 ... 600 seconds, step 30. Default: 60 seconds (1 minute).
+    var warningThresholdSeconds: Int {
+        didSet {
+            UserDefaults.standard.set(warningThresholdSeconds, forKey: "warningThresholdSeconds")
+        }
+    }
+
     init(minutes: Int = 0) {
         let seconds = minutes * 60
         self.totalSeconds = seconds
@@ -15,10 +24,13 @@ import SwiftUI
         self.isRunning = false
         self.timerState = .ready
         self.presets = [:]
+        // Load persisted threshold; fall back to 60s (1 minute) if never set.
+        let saved = UserDefaults.standard.integer(forKey: "warningThresholdSeconds")
+        self.warningThresholdSeconds = saved > 0 ? saved : 60
     }
-    
+
     func getTimeColor() -> Color {
-        if remainingSeconds > 10 {
+        if remainingSeconds > warningThresholdSeconds {
             return .primary
         } else if remainingSeconds > 0 {
             return .yellow
@@ -26,30 +38,30 @@ import SwiftUI
             return .red
         }
     }
-    
+
     func formatTime(_ seconds: Int) -> String {
         let absSeconds = abs(seconds)
         let h = absSeconds / 3600
         let m = (absSeconds % 3600) / 60
         let s = absSeconds % 60
-        
+
         let timeString: String
         if h > 0 {
             timeString = String(format: "%d:%02d:%02d", h, m, s)
         } else {
             timeString = String(format: "%02d:%02d", m, s)
         }
-        
+
         return seconds < 0 ? "-" + timeString : timeString
     }
-    
+
     enum TimerState {
         case ready
         case running
         case warning // When time is getting low
         case overtime
         case completed
-        
+
         var color: Color {
             switch self {
             case .ready: return .blue
@@ -60,4 +72,4 @@ import SwiftUI
             }
         }
     }
-} 
+}

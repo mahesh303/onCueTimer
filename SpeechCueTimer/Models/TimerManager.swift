@@ -162,10 +162,10 @@ import UIKit
             if self.settings.remainingSeconds != ceilSeconds {
                 self.settings.remainingSeconds = ceilSeconds
                 
-                // Update warning state
+                // Update warning state based on user-configured threshold
                 if self.settings.remainingSeconds <= 0 {
                     self.settings.timerState = .overtime
-                } else if self.settings.remainingSeconds <= 10 {
+                } else if self.settings.remainingSeconds <= self.settings.warningThresholdSeconds {
                     self.settings.timerState = .warning
                 }
                 
@@ -264,5 +264,17 @@ import UIKit
             settings.remainingSeconds = max(newTime, 0)
         }
         // Subtracting typically doesn't extend totalSeconds
+    }
+
+    // MARK: - Warning Threshold
+
+    /// Step the warning threshold UP by 30 seconds (max 600s / 10 min).
+    func increaseWarningThreshold() {
+        settings.warningThresholdSeconds = min(settings.warningThresholdSeconds + 30, 600)
+    }
+
+    /// Step the warning threshold DOWN by 30 seconds (min 10s).
+    func decreaseWarningThreshold() {
+        settings.warningThresholdSeconds = max(settings.warningThresholdSeconds - 30, 10)
     }
 }
