@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import onCueTimer
+@testable import SpeechCueTimer
 
 struct onCueTimerTests {
 

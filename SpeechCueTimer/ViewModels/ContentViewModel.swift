@@ -16,8 +16,9 @@ import SwiftUI
         self.timerManager.displayManager = displayManager
 
         feedbackGenerator.prepare()
-        // Initialize presets as blank - no loading from UserDefaults
+        // Initialize presets with default message for preset 1
         presets = Array(repeating: nil, count: 4)
+        presets[0] = "Times up!" // Set preset 1 default message
         // Clear any existing preset data from UserDefaults to ensure clean state
         clearOldPresetData()
     }

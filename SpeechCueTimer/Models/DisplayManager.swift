@@ -28,7 +28,10 @@ import UIKit
         )
         
         // Check for already connected displays
-        setupExternalDisplay()
+        // Defer this to the next run loop to avoid blocking app launch
+        DispatchQueue.main.async { [weak self] in
+            self?.setupExternalDisplay()
+        }
     }
     
     func setupExternalDisplay() {

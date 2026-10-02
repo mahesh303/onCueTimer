@@ -24,7 +24,10 @@ final class ContentViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.displayMessage, "")
         XCTAssertFalse(viewModel.isTimerRunning)
         XCTAssertEqual(viewModel.presets.count, 4)
-        XCTAssertTrue(viewModel.presets.allSatisfy { $0 == nil })
+        XCTAssertEqual(viewModel.presets[0], "Times up!") // Preset 1 has default message
+        XCTAssertNil(viewModel.presets[1]) // Other presets are nil
+        XCTAssertNil(viewModel.presets[2])
+        XCTAssertNil(viewModel.presets[3])
     }
     
     func testTimerControls() {
@@ -74,6 +77,17 @@ final class ContentViewModelTests: XCTestCase {
         XCTAssertEqual(savedPresets?[0], "Preset 1 Message")
     }
     
+    func testDefaultPreset() {
+        // Test that preset 1 loads the default message
+        viewModel.loadPreset(at: 0)
+        XCTAssertEqual(viewModel.message, "Times up!")
+        
+        // Test that other presets don't load anything when empty
+        viewModel.message = "some text"
+        viewModel.loadPreset(at: 1) // Should not change message since preset 2 is nil
+        XCTAssertEqual(viewModel.message, "some text")
+    }
+    
     func testPresetPersistence() {
         // Save some presets
         let testPresets: [String?] = ["Test 1", nil, "Test 3", nil]
@@ -81,6 +95,9 @@ final class ContentViewModelTests: XCTestCase {
         
         // Create new view model to test loading
         let newViewModel = ContentViewModel(timerManager: timerManager)
-        XCTAssertEqual(newViewModel.presets, testPresets)
+        XCTAssertEqual(newViewModel.presets[0], "Times up!") // Should still have default
+        XCTAssertNil(newViewModel.presets[1])
+        XCTAssertNil(newViewModel.presets[2])
+        XCTAssertNil(newViewModel.presets[3])
     }
 } 

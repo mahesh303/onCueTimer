@@ -10,6 +10,7 @@ final class TimerManagerTests: XCTestCase {
     }
     
     override func tearDown() {
+        timerManager?.pauseTimer() // Ensure timer is stopped
         timerManager = nil
         super.tearDown()
     }
@@ -91,5 +92,27 @@ final class TimerManagerTests: XCTestCase {
         timerManager.setTime(seconds: 0)
         timerManager.repeatLastTimer()
         XCTAssertEqual(timerManager.settings.totalSeconds, 120)
+    }
+    
+    func testBackgroundModeConfiguration() {
+        // Test that timer can handle background/foreground transitions
+        timerManager.setTime(seconds: 10)
+        timerManager.startTimer()
+        XCTAssertTrue(timerManager.settings.isRunning)
+        
+        // Simulate app going to background
+        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        
+        // Timer should still be running
+        XCTAssertTrue(timerManager.settings.isRunning)
+        
+        // Simulate app coming back to foreground
+        NotificationCenter.default.post(name: UIApplication.willEnterForegroundNotification, object: nil)
+        
+        // Timer should still be running
+        XCTAssertTrue(timerManager.settings.isRunning)
+        
+        timerManager.pauseTimer()
+        XCTAssertFalse(timerManager.settings.isRunning)
     }
 } 

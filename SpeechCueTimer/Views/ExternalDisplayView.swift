@@ -3,13 +3,16 @@ import SwiftUI
 extension Notification.Name {
     static let fontScaleChanged = Notification.Name("fontScaleChanged")
     static let messageZap = Notification.Name("messageZap")
+    static let timerStateChanged = Notification.Name("timerStateChanged")
 }
 
 struct ExternalDisplayView: View {
-    @State var timerManager: TimerManager
-    @State var displayManager: DisplayManager
+    let timerManager: TimerManager
+    let displayManager: DisplayManager
+    @State private var currentTime: Int = 0
     @State private var fontScale: Double = 1.0
-    @State private var isShaking: Bool = false
+    @State private var shakeClicks: Int = 0 // Used to trigger the animation
+    @State private var refreshTimer: Timer?
     
     var body: some View {
         GeometryReader { geometry in
@@ -23,9 +26,9 @@ struct ExternalDisplayView: View {
                     
                     // Timer Display
                     VStack(spacing: 20) {
-                        Text(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
+                        Text(timerManager.settings.formatTime(currentTime))
                             .font(.system(size: min(geometry.size.width * 0.12, 120) * fontScale, weight: .bold, design: .monospaced))
-                            .foregroundColor(timerManager.settings.getTimeColor())
+                            .foregroundColor(getTimeColor(for: currentTime))
                             .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 2)
                             .minimumScaleFactor(0.5)
                     }
@@ -42,7 +45,7 @@ struct ExternalDisplayView: View {
                     // Message Display
                     if !displayManager.message.isEmpty {
                         Text(displayManager.message)
-                            .font(.system(size: min(geometry.size.width * 0.06, 60), weight: .semibold))
+                            .font(.system(size: min(geometry.size.width * 0.06, 60) * fontScale, weight: .semibold))
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
                             .lineLimit(4)
@@ -52,14 +55,27 @@ struct ExternalDisplayView: View {
                             .frame(maxWidth: geometry.size.width * 0.85)
                             .background(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(isShaking ? Color.orange.opacity(0.3) : Color.blue.opacity(0.2))
-                                    .stroke(isShaking ? Color.orange.opacity(0.6) : Color.blue.opacity(0.4), lineWidth: isShaking ? 2 : 1)
+                                    .fill(Color.blue.opacity(0.2))
+                                    .stroke(Color.blue.opacity(0.4), lineWidth: 1)
                             )
                             .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 3)
-                            .scaleEffect(isShaking ? 1.05 : 1.0)
-                            .offset(x: isShaking ? CGFloat.random(in: -8...8) : 0, 
-                                   y: isShaking ? CGFloat.random(in: -8...8) : 0)
-                            .animation(.easeInOut(duration: 0.1).repeatCount(isShaking ? 8 : 0, autoreverses: true), value: isShaking)
+                            // Apply keyframe animator for shake
+                            .keyframeAnimator(initialValue: 0, trigger: shakeClicks) { content, value in
+                                content
+                                    .rotationEffect(.degrees(value), anchor: .bottom)
+                                    .offset(x: value * 2)
+                            } keyframes: { _ in
+                                KeyframeTrack {
+                                    SpringKeyframe(0, duration: 0.0)
+                                    SpringKeyframe(-5, duration: 0.05)
+                                    SpringKeyframe(5, duration: 0.05)
+                                    SpringKeyframe(-5, duration: 0.05)
+                                    SpringKeyframe(5, duration: 0.05)
+                                    SpringKeyframe(-3, duration: 0.05)
+                                    SpringKeyframe(3, duration: 0.05)
+                                    SpringKeyframe(0, duration: 0.1)
+                                }
+                            }
                     }
                     
                     Spacer()
@@ -69,6 +85,31 @@ struct ExternalDisplayView: View {
         }
         .onAppear {
             fontScale = FontSizeManager.shared.currentScale
+            
+            // Immediate initialization
+            currentTime = timerManager.settings.remainingSeconds
+            
+            // Start a more aggressive refresh timer to force updates
+            refreshTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                DispatchQueue.main.async {
+                    let newTime = timerManager.settings.remainingSeconds
+                    currentTime = newTime
+                }
+            }
+            
+            // Also try to observe timer state changes
+            NotificationCenter.default.addObserver(
+                forName: .timerStateChanged,
+                object: nil,
+                queue: .main
+            ) { _ in
+                currentTime = timerManager.settings.remainingSeconds
+            }
+        }
+        .onDisappear {
+            refreshTimer?.invalidate()
+            refreshTimer = nil
+            NotificationCenter.default.removeObserver(self, name: .timerStateChanged, object: nil)
         }
         .onReceive(NotificationCenter.default.publisher(for: .fontScaleChanged)) { notification in
             if let newScale = notification.object as? Double {
@@ -83,13 +124,17 @@ struct ExternalDisplayView: View {
     private func triggerShakeAnimation() {
         // Only shake if there's a message to shake
         guard !displayManager.message.isEmpty else { return }
-        
-        // Start shaking
-        isShaking = true
-        
-        // Stop shaking after animation completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            isShaking = false
+        shakeClicks += 1
+    }
+    
+    private func getTimeColor(for seconds: Int) -> Color {
+        if seconds > 10 {
+            return .primary
+        } else if seconds > 0 {
+            return .yellow
+        } else {
+            return .red
         }
     }
 }
+
