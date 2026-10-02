@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ControlPanel: View {
     let timerManager: TimerManager
-    
+
     var body: some View {
         GeometryReader { geometry in
             VStack(alignment: .trailing, spacing: 12) {
@@ -13,16 +13,15 @@ struct ControlPanel: View {
                     .cornerRadius(6.5)
                     .padding()
                 Spacer().frame(height: 44)
-                
-               
-                
-                // Only Presets remain
+
+                // Time presets — labelled "Time N" to distinguish from message presets
+                // in the message panel which are labelled "Preset N".
                 ForEach(1...4, id: \.self) { number in
                     HStack(spacing: 4) {
-                        Text("Preset \(number)")
+                        Text("Time \(number)")
                             .frame(width: 45, alignment: .trailing)
                             .font(.system(size: 10))
-                        
+
                         Button {
                             if !timerManager.settings.isRunning {
                                 timerManager.loadPreset(number: number)
@@ -44,42 +43,31 @@ struct ControlPanel: View {
                         }
                     }
                 }
-                
-                // Add the -10 and +10 buttons
+
+                // +10 / -10 buttons unified with .buttonStyle(.bordered) to match
+                // the rest of the app's button language (was using raw .background/.overlay).
                 HStack(spacing: 10) {
-                    Button(action: {
+                    Button("-10") {
                         timerManager.subtractTime(seconds: 10)
-                    }) {
-                        Text("-10")
-                            .frame(width: 70, height: 40)
-                            .background(Color.red.opacity(0.2))
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.red, lineWidth: 1)
-                            )
                     }
-                    
-                    Button(action: {
+                    .buttonStyle(.bordered)
+                    .tint(.red)
+                    .frame(width: 70, height: 40)
+
+                    Button("+10") {
                         timerManager.addTime(seconds: 10)
-                    }) {
-                        Text("+10")
-                            //.font(.title.bold())
-                            .frame(width: 70, height: 40)
-                            .background(Color.green.opacity(0.2))
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.green, lineWidth: 1)
-                            )
                     }
+                    .buttonStyle(.bordered)
+                    .tint(.green)
+                    .frame(width: 70, height: 40)
                 }
                 .padding(.top, 20)
-                
+
                 Spacer()
             }
             .frame(width: min(120, geometry.size.width * 0.9))
             .padding(.horizontal, 4)
         }
     }
-} 
+}
+
