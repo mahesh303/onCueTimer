@@ -22,6 +22,8 @@ struct MessageDisplayCard: View {
     let message: String
     let fontSize: CGFloat
     var cornerRadius: CGFloat = 16
+    var verticalPadding: CGFloat = 20
+    var horizontalPadding: CGFloat = 24
 
     /// Incrementing this value re-triggers the keyframe shake animation.
     @State private var shakeClicks: Int = 0
@@ -31,10 +33,10 @@ struct MessageDisplayCard: View {
             .font(.system(size: fontSize, weight: .semibold))
             .foregroundColor(.white)
             .multilineTextAlignment(.center)
-            .lineLimit(4)
-            .minimumScaleFactor(0.6)
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
+            .lineLimit(3)
+            .minimumScaleFactor(0.5)
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(Color.blue.opacity(0.2))

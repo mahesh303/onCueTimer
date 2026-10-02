@@ -4,6 +4,8 @@ struct TimeDisplay: View {
     let seconds: Int
     let timerManager: TimerManager
 
+    var fontSize: CGFloat = 80
+
     // Drives the scale animation; toggled by the .task below.
     @State private var isPulsing = false
 
@@ -15,10 +17,12 @@ struct TimeDisplay: View {
 
     var body: some View {
         Text(timerManager.settings.formatTime(seconds))
-            .font(.system(size: 80, weight: .bold, design: .monospaced))
+            .font(.system(size: fontSize, weight: .bold, design: .monospaced))
             .monospacedDigit()
             .foregroundColor(timerManager.settings.getTimeColor())
-            .scaleEffect(isPulsing ? 1.1 : 1.0)
+            .lineLimit(1)
+            .minimumScaleFactor(0.35)
+            .scaleEffect(isPulsing ? 1.08 : 1.0)
             // .task(id:) is re-launched whenever shouldPulse changes and is
             // automatically cancelled when the view disappears — no leaks.
             .task(id: shouldPulse) {

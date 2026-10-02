@@ -41,8 +41,8 @@ struct ExternalDisplayView: View {
                         Text(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
                             .font(.system(size: min(geometry.size.width * 0.12, 120) * fontScale, weight: .bold, design: .monospaced))
                             .foregroundColor(getTimeColor(for: timerManager.settings.remainingSeconds))
-                            .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 2)
-                            .minimumScaleFactor(0.5)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.4)
                             // Pulse animation: scale up/down while in yellow warning state.
                             // Slightly more dramatic (1.12) than operator view since this
                             // is meant to grab the speaker's attention on the big screen.

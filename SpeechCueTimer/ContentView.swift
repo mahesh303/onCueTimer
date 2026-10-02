@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var viewModel: ContentViewModel
     @State private var isKeyboardVisible = false
     @State private var showCursor = false
+    @State private var fontSizeManager = FontSizeManager.shared
 
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
@@ -40,66 +41,83 @@ struct ContentView: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.2))
                             
-                            VStack {
+                            VStack(spacing: 8) {
                                 Spacer()
-                                    .frame(height: 20)
                                 
-                                TimeDisplay(seconds: timerManager.settings.remainingSeconds, timerManager: timerManager)
-                                    .accessibilityLabel("Timer")
-                                    .accessibilityValue(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
-                                    .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
+                                TimeDisplay(
+                                    seconds: timerManager.settings.remainingSeconds,
+                                    timerManager: timerManager,
+                                    fontSize: timerFontSize(geometry: geometry, hasMessage: !viewModel.displayMessage.isEmpty)
+                                )
+                                .accessibilityLabel("Timer")
+                                .accessibilityValue(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
+                                .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
+                                .padding(.horizontal, 48) // Safe clearance away from the +/- buttons in the top right
                                 
-                                Spacer()
-
                                 // Operator preview of what is live on the speaker's screen.
                                 // Uses MessageDisplayCard so the operator sees the same
                                 // blue card styling and zap shake animation.
                                 if !viewModel.displayMessage.isEmpty {
-                                    VStack(spacing: 4) {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "tv.fill")
-                                                .font(.caption2)
-                                            Text("Live on display")
-                                                .font(.caption2.bold())
-                                        }
-                                        .foregroundColor(.secondary)
+                                    Spacer().frame(height: 4)
 
-                                        MessageDisplayCard(
-                                            message: viewModel.displayMessage,
-                                            fontSize: 20,
-                                            cornerRadius: 10
-                                        )
-                                        .frame(maxWidth: .infinity)
-                                        .accessibilityLabel("Currently displayed message")
-                                    }
+                                    MessageDisplayCard(
+                                        message: viewModel.displayMessage,
+                                        fontSize: messageFontSize(geometry: geometry),
+                                        cornerRadius: 10,
+                                        verticalPadding: 12,
+                                        horizontalPadding: 16
+                                    )
+                                    .padding(.horizontal, 16)
+                                    .frame(maxWidth: .infinity)
+                                    .accessibilityLabel("Currently displayed message")
                                 }
 
                                 Spacer()
                             }
                             .padding()
+                            .animation(.easeInOut(duration: 0.2), value: fontSizeManager.currentScale)
                             
                             // Font size control buttons (top right corner)
+                            // Both buttons use matching SF Symbols and identical circular dimensions
                             VStack {
                                 HStack {
                                     Spacer()
                                     VStack(spacing: 8) {
-                                        Button("+") {
-                                            FontSizeManager.shared.increaseFontSize()
+                                        Button {
+                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                fontSizeManager.increaseFontSize()
+                                            }
+                                        } label: {
+                                            Image(systemName: "plus")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundColor(.white)
+                                                .frame(width: 36, height: 36)
+                                                .background(fontSizeManager.canIncrease ? Color.blue : Color.gray.opacity(0.4))
+                                                .clipShape(Circle())
+                                                .shadow(color: .black.opacity(fontSizeManager.canIncrease ? 0.2 : 0.05), radius: 2, x: 0, y: 1)
                                         }
-                                        .buttonStyle(.borderedProminent)
-                                        .tint(.blue)
-                                        .frame(width: 40, height: 40)
-                                        .font(.title2.bold())
-                                        .accessibilityLabel("Increase external display font size for timer and messages")
+                                        .buttonStyle(.plain)
+                                        .disabled(!fontSizeManager.canIncrease)
+                                        .accessibilityLabel("Increase font size for timer and messages")
+                                        .accessibilityValue("\(Int(round(fontSizeManager.currentScale * 100))) percent")
                                         
-                                        Button("-") {
-                                            FontSizeManager.shared.decreaseFontSize()
+                                        Button {
+                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                fontSizeManager.decreaseFontSize()
+                                            }
+                                        } label: {
+                                            Image(systemName: "minus")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundColor(.white)
+                                                .frame(width: 36, height: 36)
+                                                .background(fontSizeManager.canDecrease ? Color.blue : Color.gray.opacity(0.4))
+                                                .clipShape(Circle())
+                                                .shadow(color: .black.opacity(fontSizeManager.canDecrease ? 0.2 : 0.05), radius: 2, x: 0, y: 1)
                                         }
-                                        .buttonStyle(.borderedProminent)
-                                        .tint(.blue)
-                                        .frame(width: 40, height: 40)
-                                        .font(.title2.bold())
-                                        .accessibilityLabel("Decrease external display font size for timer and messages")
+                                        .buttonStyle(.plain)
+                                        .disabled(!fontSizeManager.canDecrease)
+                                        .accessibilityLabel("Decrease font size for timer and messages")
+                                        .accessibilityValue("\(Int(round(fontSizeManager.currentScale * 100))) percent")
                                     }
                                     .padding(.trailing, 16)
                                     .padding(.top, 16)
@@ -415,6 +433,23 @@ struct ContentView: View {
         }
     }
     
+    // MARK: - Display Sizing Helpers
+    
+    /// Adaptive timer font size that scales with the + / - buttons
+    /// and scales down gracefully when a message card is also on screen so everything
+    /// fits comfortably within the Program Display container.
+    private func timerFontSize(geometry: GeometryProxy, hasMessage: Bool) -> CGFloat {
+        let baseSize: CGFloat = hasMessage
+            ? min(geometry.size.width * 0.055, 54)
+            : min(geometry.size.width * 0.075, 76)
+        return baseSize * fontSizeManager.currentScale
+    }
+
+    /// Adaptive message font size that scales with + / - buttons while staying within screen limits.
+    private func messageFontSize(geometry: GeometryProxy) -> CGFloat {
+        let baseSize: CGFloat = 18
+        return baseSize * fontSizeManager.currentScale
+    }
 }
 
 #Preview {
