@@ -16,11 +16,9 @@ import SwiftUI
         self.timerManager.displayManager = displayManager
 
         feedbackGenerator.prepare()
-        // Initialize presets with default message for preset 1
+        // Message presets are session-only (not persisted across launches).
         presets = Array(repeating: nil, count: 4)
-        presets[0] = "Times up!" // Set preset 1 default message
-        // Clear any existing preset data from UserDefaults to ensure clean state
-        clearOldPresetData()
+        presets[0] = "Times up!" // Default message for preset 1
     }
     
     // MARK: - Timer Controls
@@ -91,10 +89,4 @@ import SwiftUI
         feedbackGenerator.impactOccurred(intensity: 1.0)
     }
     
-    // MARK: - UserDefaults Cleanup
-    
-    private func clearOldPresetData() {
-        // Remove any existing preset data from UserDefaults to ensure clean state
-        UserDefaults.standard.removeObject(forKey: "messagePresets")
-    }
-} 
+}
