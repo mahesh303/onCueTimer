@@ -9,13 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     let timerManager: TimerManager
-    let viewModel: ContentViewModel
+    // @State ensures ContentViewModel is created once and SwiftUI tracks its @Observable changes.
+    // Previously stored as `let`, which prevented SwiftUI's observation system from subscribing.
+    @State private var viewModel: ContentViewModel
     @State private var isKeyboardVisible = false
     @State private var showCursor = false
-    
+
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
-        self.viewModel = ContentViewModel(timerManager: timerManager)
+        // _viewModel wraps the @State storage directly so it is only allocated once.
+        _viewModel = State(initialValue: ContentViewModel(timerManager: timerManager))
     }
     
     var body: some View {
