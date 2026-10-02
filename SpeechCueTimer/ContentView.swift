@@ -50,16 +50,30 @@ struct ContentView: View {
                                     .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
                                 
                                 Spacer()
-                                
+
+                                // Operator preview of what is live on the speaker's screen.
+                                // Uses MessageDisplayCard so the operator sees the same
+                                // blue card styling and zap shake animation.
                                 if !viewModel.displayMessage.isEmpty {
-                                    Text(viewModel.displayMessage)
-                                        .padding()
+                                    VStack(spacing: 4) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "tv.fill")
+                                                .font(.caption2)
+                                            Text("Live on display")
+                                                .font(.caption2.bold())
+                                        }
+                                        .foregroundColor(.secondary)
+
+                                        MessageDisplayCard(
+                                            message: viewModel.displayMessage,
+                                            fontSize: 20,
+                                            cornerRadius: 10
+                                        )
                                         .frame(maxWidth: .infinity)
-                                        .background(Color.gray.opacity(0.3))
-                                        .cornerRadius(8)
-                                        .accessibilityLabel("Display message")
+                                        .accessibilityLabel("Currently displayed message")
+                                    }
                                 }
-                                
+
                                 Spacer()
                             }
                             .padding()
