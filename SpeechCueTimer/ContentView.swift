@@ -200,9 +200,9 @@ struct ContentView: View {
                                 .padding(8)
                             }
                             .onTapGesture {
-                                // Show our floating keyboard and start cursor animation
+                                // Show our floating keyboard. The .task(id: isKeyboardVisible)
+                                // modifier on the body handles cursor animation.
                                 isKeyboardVisible = true
-                                startCursorAnimation()
                             }
                             .accessibilityLabel("Message input")
                             .accessibilityValue(viewModel.message.isEmpty ? "No message" : viewModel.message)
@@ -276,6 +276,23 @@ struct ContentView: View {
                 showCursor = false
             }
         }
+        // .task(id:) is re-launched whenever isKeyboardVisible changes and
+        // automatically cancelled when the view disappears OR when id changes.
+        // This replaces the old Timer.scheduledTimer which leaked a new timer
+        // on every tap (multiple overlapping timers could stack up).
+        .task(id: isKeyboardVisible) {
+            guard isKeyboardVisible else {
+                showCursor = false
+                return
+            }
+            showCursor = true
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                if !Task.isCancelled {
+                    showCursor.toggle()
+                }
+            }
+        }
     }
     
     private func handleKeyTap(_ key: String) {
@@ -302,17 +319,6 @@ struct ContentView: View {
         }
     }
     
-    private func startCursorAnimation() {
-        showCursor = true
-        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
-            if isKeyboardVisible {
-                showCursor.toggle()
-            } else {
-                showCursor = false
-                timer.invalidate()
-            }
-        }
-    }
 }
 
 #Preview {
