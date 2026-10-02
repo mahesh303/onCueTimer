@@ -22,6 +22,9 @@ struct ContentView: View {
     }
     
     var body: some View {
+        // @Bindable lets us create $bindings to @Observable properties
+        // from a `let` stored property — required for the pulse Toggle below.
+        @Bindable var settings = timerManager.settings
         GeometryReader { geometry in
             HStack(spacing: 0) {
                 // Left side: Timer Display and Controls
@@ -221,6 +224,26 @@ struct ContentView: View {
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
+                    }
+
+                    // Pulse animation toggle — grouped with the threshold stepper
+                    // so both warning controls are in one place.
+                    HStack(spacing: 8) {
+                        Image(systemName: "waveform")
+                            .foregroundColor(.yellow)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Pulse animation")
+                                .font(.subheadline.bold())
+                            Text("Zoom in/out during warning")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: $settings.pulseAnimationEnabled)
+                            .labelsHidden()
+                            .tint(.yellow)
+                            .accessibilityLabel("Pulse animation when warning")
+                            .accessibilityHint("When on, the timer zooms in and out to alert the speaker during the warning period")
                     }
 
                     // Message Area

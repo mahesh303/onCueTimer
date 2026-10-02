@@ -17,6 +17,14 @@ import SwiftUI
         }
     }
 
+    // When true, the timer text pulses (zoom in/out) while in the yellow warning state.
+    // Helps catch the speaker's eye when they are close to their time limit.
+    var pulseAnimationEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(pulseAnimationEnabled, forKey: "pulseAnimationEnabled")
+        }
+    }
+
     init(minutes: Int = 0) {
         let seconds = minutes * 60
         self.totalSeconds = seconds
@@ -27,6 +35,12 @@ import SwiftUI
         // Load persisted threshold; fall back to 60s (1 minute) if never set.
         let saved = UserDefaults.standard.integer(forKey: "warningThresholdSeconds")
         self.warningThresholdSeconds = saved > 0 ? saved : 60
+        // Load persisted pulse toggle; defaults to true (on) for new installs.
+        // UserDefaults.bool returns false if key missing, so we check explicitly.
+        let hasPulseKey = UserDefaults.standard.object(forKey: "pulseAnimationEnabled") != nil
+        self.pulseAnimationEnabled = hasPulseKey
+            ? UserDefaults.standard.bool(forKey: "pulseAnimationEnabled")
+            : true
     }
 
     func getTimeColor() -> Color {

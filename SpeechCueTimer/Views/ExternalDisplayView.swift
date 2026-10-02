@@ -11,11 +11,19 @@ struct ExternalDisplayView: View {
     let displayManager: DisplayManager
     @State private var fontScale: Double = 1.0
     @State private var shakeClicks: Int = 0
+    // Drives the pulse scale animation on the timer text.
+    @State private var isPulsing = false
 
     // Token from the closure-form NotificationCenter observer must be stored so
     // we can remove it in onDisappear. Previously the token was discarded,
     // making the observer impossible to remove (leaked forever).
     @State private var timerStateObserverToken: (any NSObjectProtocol)?
+
+    // Active when the timer is yellow AND the operator has enabled the pulse toggle.
+    private var shouldPulse: Bool {
+        timerManager.settings.timerState == .warning &&
+        timerManager.settings.pulseAnimationEnabled
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -36,6 +44,22 @@ struct ExternalDisplayView: View {
                             .foregroundColor(getTimeColor(for: timerManager.settings.remainingSeconds))
                             .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 2)
                             .minimumScaleFactor(0.5)
+                            // Pulse animation: scale up/down while in yellow warning state.
+                            // Slightly more dramatic (1.12) than operator view since this
+                            // is meant to grab the speaker's attention on the big screen.
+                            .scaleEffect(isPulsing ? 1.12 : 1.0)
+                            .task(id: shouldPulse) {
+                                if shouldPulse {
+                                    while !Task.isCancelled {
+                                        withAnimation(.easeInOut(duration: 0.65)) { isPulsing = true }
+                                        try? await Task.sleep(for: .milliseconds(650))
+                                        withAnimation(.easeInOut(duration: 0.65)) { isPulsing = false }
+                                        try? await Task.sleep(for: .milliseconds(650))
+                                    }
+                                } else {
+                                    withAnimation(.easeInOut(duration: 0.3)) { isPulsing = false }
+                                }
+                            }
                     }
                     .frame(maxWidth: geometry.size.width * 0.9)
                     .padding(.vertical, 30)
