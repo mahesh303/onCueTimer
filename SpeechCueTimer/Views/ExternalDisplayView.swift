@@ -9,26 +9,31 @@ extension Notification.Name {
 struct ExternalDisplayView: View {
     let timerManager: TimerManager
     let displayManager: DisplayManager
-    @State private var currentTime: Int = 0
     @State private var fontScale: Double = 1.0
-    @State private var shakeClicks: Int = 0 // Used to trigger the animation
-    @State private var refreshTimer: Timer?
-    
+    @State private var shakeClicks: Int = 0
+
+    // Token from the closure-form NotificationCenter observer must be stored so
+    // we can remove it in onDisappear. Previously the token was discarded,
+    // making the observer impossible to remove (leaked forever).
+    @State private var timerStateObserverToken: (any NSObjectProtocol)?
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 // Black background for external display
                 Color.black
                     .ignoresSafeArea(.all)
-                
+
                 VStack(spacing: 40) {
                     Spacer()
-                    
-                    // Timer Display
+
+                    // Timer Display — reads directly from @Observable timerManager.
+                    // SwiftUI's observation system re-renders this view automatically
+                    // when remainingSeconds changes; no local @State copy or polling needed.
                     VStack(spacing: 20) {
-                        Text(timerManager.settings.formatTime(currentTime))
+                        Text(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
                             .font(.system(size: min(geometry.size.width * 0.12, 120) * fontScale, weight: .bold, design: .monospaced))
-                            .foregroundColor(getTimeColor(for: currentTime))
+                            .foregroundColor(getTimeColor(for: timerManager.settings.remainingSeconds))
                             .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 2)
                             .minimumScaleFactor(0.5)
                     }
@@ -39,9 +44,9 @@ struct ExternalDisplayView: View {
                             .fill(Color.white.opacity(0.1))
                             .stroke(Color.white.opacity(0.2), lineWidth: 1)
                     )
-                    
+
                     Spacer()
-                    
+
                     // Message Display
                     if !displayManager.message.isEmpty {
                         Text(displayManager.message)
@@ -59,7 +64,6 @@ struct ExternalDisplayView: View {
                                     .stroke(Color.blue.opacity(0.4), lineWidth: 1)
                             )
                             .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 3)
-                            // Apply keyframe animator for shake
                             .keyframeAnimator(initialValue: 0, trigger: shakeClicks) { content, value in
                                 content
                                     .rotationEffect(.degrees(value), anchor: .bottom)
@@ -77,7 +81,7 @@ struct ExternalDisplayView: View {
                                 }
                             }
                     }
-                    
+
                     Spacer()
                 }
                 .padding(20)
@@ -85,31 +89,26 @@ struct ExternalDisplayView: View {
         }
         .onAppear {
             fontScale = FontSizeManager.shared.currentScale
-            
-            // Immediate initialization
-            currentTime = timerManager.settings.remainingSeconds
-            
-            // Start a more aggressive refresh timer to force updates
-            refreshTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-                DispatchQueue.main.async {
-                    let newTime = timerManager.settings.remainingSeconds
-                    currentTime = newTime
-                }
-            }
-            
-            // Also try to observe timer state changes
-            NotificationCenter.default.addObserver(
+
+            // Store the observer token so we can remove it in onDisappear.
+            // Previously this used the closure form but discarded the token,
+            // making it impossible to remove (leaked for the app's lifetime).
+            timerStateObserverToken = NotificationCenter.default.addObserver(
                 forName: .timerStateChanged,
                 object: nil,
                 queue: .main
             ) { _ in
-                currentTime = timerManager.settings.remainingSeconds
+                // No-op: @Observable timerManager drives re-renders automatically.
+                // Kept here in case other subsystems need to react to this notification.
             }
         }
         .onDisappear {
-            refreshTimer?.invalidate()
-            refreshTimer = nil
-            NotificationCenter.default.removeObserver(self, name: .timerStateChanged, object: nil)
+            // Properly remove the stored token — this is the only correct way
+            // to deregister a closure-form NotificationCenter observer.
+            if let token = timerStateObserverToken {
+                NotificationCenter.default.removeObserver(token)
+                timerStateObserverToken = nil
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .fontScaleChanged)) { notification in
             if let newScale = notification.object as? Double {
@@ -120,13 +119,12 @@ struct ExternalDisplayView: View {
             triggerShakeAnimation()
         }
     }
-    
+
     private func triggerShakeAnimation() {
-        // Only shake if there's a message to shake
         guard !displayManager.message.isEmpty else { return }
         shakeClicks += 1
     }
-    
+
     private func getTimeColor(for seconds: Int) -> Color {
         if seconds > 10 {
             return .primary
@@ -137,4 +135,3 @@ struct ExternalDisplayView: View {
         }
     }
 }
-
