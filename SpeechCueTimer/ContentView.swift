@@ -99,6 +99,7 @@ struct ContentView: View {
         .sheet(isPresented: $showHelp) {
             HelpView()
         }
+        .speakerDisplayAccessory(timerManager: timerManager, displayManager: viewModel.displayManager)
     }
 
     private func handleKeyTap(_ key: String) {

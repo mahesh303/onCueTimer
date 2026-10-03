@@ -6,6 +6,40 @@ extension Notification.Name {
     static let timerStateChanged = Notification.Name("timerStateChanged")
 }
 
+extension View {
+    /// Puts the speaker view on a connected HDMI/AirPlay screen. From iOS 27 the
+    /// system only gives an app the external screen if it registers a scene
+    /// accessory for it; otherwise it silently mirrors the operator screen.
+    /// Earlier versions are handled by DisplayManager instead.
+    func speakerDisplayAccessory(timerManager: TimerManager, displayManager: DisplayManager) -> some View {
+        modifier(SpeakerDisplayAccessory(timerManager: timerManager, displayManager: displayManager))
+    }
+}
+
+private struct SpeakerDisplayAccessory: ViewModifier {
+    let timerManager: TimerManager
+    let displayManager: DisplayManager
+
+    func body(content: Content) -> some View {
+        if #available(iOS 27.0, *) {
+            content.sceneAccessory {
+                ExternalNonInteractiveAccessory {
+                    ExternalDisplayView(timerManager: timerManager, displayManager: displayManager)
+                        .onAppear { displayManager.isAccessoryShowing = true }
+                        .onDisappear { displayManager.isAccessoryShowing = false }
+                }
+                .onAvailabilityChange { isAvailable in
+                    if !isAvailable {
+                        displayManager.isAccessoryShowing = false
+                    }
+                }
+            }
+        } else {
+            content
+        }
+    }
+}
+
 struct ExternalDisplayView: View {
     let timerManager: TimerManager
     let displayManager: DisplayManager
