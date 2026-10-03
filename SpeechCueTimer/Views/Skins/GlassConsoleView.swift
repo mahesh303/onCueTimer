@@ -13,6 +13,7 @@ struct GlassConsoleView: View {
     let viewModel: ContentViewModel
     let showCursor: Bool
     @Binding var isKeyboardVisible: Bool
+    let onOpenHelp: () -> Void
     let onOpenSettings: () -> Void
 
     @State private var fontSizeManager = FontSizeManager.shared
@@ -109,7 +110,7 @@ struct GlassConsoleView: View {
 
             DisplayStatusPill(isConnected: viewModel.isExternalDisplayConnected)
             FontScaleControl()
-            SettingsGearButton(action: onOpenSettings)
+            HeaderButtons(onHelp: onOpenHelp, onSettings: onOpenSettings)
         }
         .frame(height: 48)
     }

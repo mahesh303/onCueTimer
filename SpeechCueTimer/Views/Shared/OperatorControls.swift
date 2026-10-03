@@ -80,19 +80,32 @@ struct DisplayStatusPill: View {
     }
 }
 
-struct SettingsGearButton: View {
-    let action: () -> Void
+/// Help and Settings, grouped in one glass capsule like an iOS toolbar.
+struct HeaderButtons: View {
+    let onHelp: () -> Void
+    let onSettings: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Image(systemName: "gearshape")
-                .font(.system(size: 19, weight: .semibold))
-                .foregroundStyle(SkinColor.primaryText)
-                .frame(width: 44, height: 44)
-                .skinGlass(in: Circle(), interactive: true)
+        HStack(spacing: 0) {
+            Button(action: onHelp) {
+                Image(systemName: "questionmark")
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 44, height: 44)
+            }
+            .accessibilityLabel("Help")
+            .accessibilityHint("Opens the user guide")
+
+            Button(action: onSettings) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 19, weight: .semibold))
+                    .frame(width: 44, height: 44)
+            }
+            .accessibilityLabel("Settings")
         }
         .buttonStyle(SkinPressStyle())
-        .accessibilityLabel("Settings")
+        .foregroundStyle(SkinColor.primaryText)
+        .padding(.horizontal, 2)
+        .skinGlass(in: Capsule(), interactive: true)
     }
 }
 

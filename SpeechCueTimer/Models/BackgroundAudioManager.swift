@@ -15,25 +15,75 @@ final class BackgroundAudioManager {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-            try audioSession.setActive(true)
+            activateAudioSession()
         } catch {
             print("Failed to setup audio session: \(error)")
+        }
+    }
+
+    private func activateAudioSession(completion: ((Bool) -> Void)? = nil) {
+        let audioSession = AVAudioSession.sharedInstance()
+        if #available(iOS 27.0, *) {
+            audioSession.activate(options: []) { activated, error in
+                if let error = error {
+                    print("Failed to activate audio session asynchronously: \(error)")
+                }
+                completion?(activated)
+            }
+        } else {
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try audioSession.setActive(true)
+                    completion?(true)
+                } catch {
+                    print("Failed to activate audio session: \(error)")
+                    completion?(false)
+                }
+            }
+        }
+    }
+
+    private func deactivateAudioSession(completion: ((Bool) -> Void)? = nil) {
+        let audioSession = AVAudioSession.sharedInstance()
+        if #available(iOS 27.0, *) {
+            audioSession.deactivate(options: []) { deactivated, error in
+                if let error = error {
+                    print("Failed to deactivate audio session asynchronously: \(error)")
+                }
+                completion?(deactivated)
+            }
+        } else {
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+                    completion?(true)
+                } catch {
+                    print("Failed to deactivate audio session: \(error)")
+                    completion?(false)
+                }
+            }
         }
     }
     
     func startSilentAudio() {
         guard !isPlayingSilentAudio else { return }
         
-        // Create a silent audio file programmatically
-        if let silentAudioURL = createSilentAudioFile() {
-            do {
-                audioPlayer = try AVAudioPlayer(contentsOf: silentAudioURL)
-                audioPlayer?.numberOfLoops = -1 // Loop indefinitely
-                audioPlayer?.volume = 0.0 // Silent
-                audioPlayer?.play()
-                isPlayingSilentAudio = true
-            } catch {
-                print("Failed to play silent audio: \(error)")
+        activateAudioSession { [weak self] success in
+            guard success, let self = self else { return }
+            
+            // Create a silent audio file programmatically
+            if let silentAudioURL = self.createSilentAudioFile() {
+                DispatchQueue.main.async {
+                    do {
+                        self.audioPlayer = try AVAudioPlayer(contentsOf: silentAudioURL)
+                        self.audioPlayer?.numberOfLoops = -1 // Loop indefinitely
+                        self.audioPlayer?.volume = 0.0 // Silent
+                        self.audioPlayer?.play()
+                        self.isPlayingSilentAudio = true
+                    } catch {
+                        print("Failed to play silent audio: \(error)")
+                    }
+                }
             }
         }
     }
@@ -42,6 +92,7 @@ final class BackgroundAudioManager {
         audioPlayer?.stop()
         audioPlayer = nil
         isPlayingSilentAudio = false
+        deactivateAudioSession()
     }
     
     private func createSilentAudioFile() -> URL? {
