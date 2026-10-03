@@ -77,6 +77,28 @@ final class ContentViewModelTests: XCTestCase {
         XCTAssertEqual(savedPresets?[0], "Preset 1 Message")
     }
     
+    func testSendPresetKeepsDraft() {
+        viewModel.message = "Draft in progress"
+        viewModel.sendPreset(at: 0)
+        XCTAssertEqual(viewModel.displayMessage, "Times up!")
+        XCTAssertEqual(viewModel.message, "Draft in progress")
+
+        // Empty slots and out-of-range indexes leave the display alone
+        viewModel.sendPreset(at: 1)
+        viewModel.sendPreset(at: 9)
+        XCTAssertEqual(viewModel.displayMessage, "Times up!")
+    }
+
+    func testHideMessageKeepsDraft() {
+        viewModel.message = "Wrap up"
+        viewModel.sendMessage()
+        viewModel.message = "Next draft"
+
+        viewModel.hideMessage()
+        XCTAssertEqual(viewModel.displayMessage, "")
+        XCTAssertEqual(viewModel.message, "Next draft")
+    }
+
     func testDefaultPreset() {
         // Test that preset 1 loads the default message
         viewModel.loadPreset(at: 0)

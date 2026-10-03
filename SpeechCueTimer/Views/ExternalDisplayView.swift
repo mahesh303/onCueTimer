@@ -10,81 +10,25 @@ struct ExternalDisplayView: View {
     let timerManager: TimerManager
     let displayManager: DisplayManager
     @State private var fontScale: Double = 1.0
-    // Drives the pulse scale animation on the timer text.
-    @State private var isPulsing = false
+    // Same key the Settings sheet writes, so the speaker screen switches skin with the operator screen.
+    @AppStorage(AppSkin.storageKey) private var skin: AppSkin = .glassConsole
 
     // Token from the closure-form NotificationCenter observer must be stored so
     // we can remove it in onDisappear. Previously the token was discarded,
     // making the observer impossible to remove (leaked forever).
     @State private var timerStateObserverToken: (any NSObjectProtocol)?
 
-    // Active when the timer is yellow AND the operator has enabled the pulse toggle.
-    private var shouldPulse: Bool {
-        timerManager.settings.timerState == .warning &&
-        timerManager.settings.pulseAnimationEnabled
-    }
-
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Black background for external display
-                Color.black
-                    .ignoresSafeArea(.all)
-
-                VStack(spacing: 40) {
-                    Spacer()
-
-                    // Timer Display — reads directly from @Observable timerManager.
-                    // SwiftUI's observation system re-renders this view automatically
-                    // when remainingSeconds changes; no local @State copy or polling needed.
-                    VStack(spacing: 20) {
-                        Text(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
-                            .font(.system(size: min(geometry.size.width * 0.12, 120) * fontScale, weight: .bold, design: .monospaced))
-                            .foregroundColor(getTimeColor(for: timerManager.settings.remainingSeconds))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.4)
-                            // Pulse animation: scale up/down while in yellow warning state.
-                            // Slightly more dramatic (1.12) than operator view since this
-                            // is meant to grab the speaker's attention on the big screen.
-                            .scaleEffect(isPulsing ? 1.12 : 1.0)
-                            .task(id: shouldPulse) {
-                                if shouldPulse {
-                                    while !Task.isCancelled {
-                                        withAnimation(.easeInOut(duration: 0.65)) { isPulsing = true }
-                                        try? await Task.sleep(for: .milliseconds(650))
-                                        withAnimation(.easeInOut(duration: 0.65)) { isPulsing = false }
-                                        try? await Task.sleep(for: .milliseconds(650))
-                                    }
-                                } else {
-                                    withAnimation(.easeInOut(duration: 0.3)) { isPulsing = false }
-                                }
-                            }
-                    }
-                    .frame(maxWidth: geometry.size.width * 0.9)
-                    .padding(.vertical, 30)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.1))
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                    )
-
-                    Spacer()
-
-                    // Message Display — delegates shake/zap animation to shared card.
-                    if !displayManager.message.isEmpty {
-                        MessageDisplayCard(
-                            message: displayManager.message,
-                            fontSize: min(geometry.size.width * 0.06, 60) * fontScale
-                        )
-                        .padding(.horizontal, 40)
-                        .frame(maxWidth: geometry.size.width * 0.85)
-                    }
-
-                    Spacer()
-                }
-                .padding(20)
-            }
-        }
+        // Reads directly from @Observable timerManager, so SwiftUI re-renders on every
+        // tick with no polling. The operator screens embed this same view as their preview.
+        SpeakerDisplayView(
+            skin: skin,
+            timerManager: timerManager,
+            message: displayManager.message,
+            fontScale: fontScale
+        )
+        .ignoresSafeArea()
+        .preferredColorScheme(.dark)
         .onAppear {
             fontScale = FontSizeManager.shared.currentScale
 
@@ -112,16 +56,6 @@ struct ExternalDisplayView: View {
             if let newScale = notification.object as? Double {
                 fontScale = newScale
             }
-        }
-    }
-
-    private func getTimeColor(for seconds: Int) -> Color {
-        if seconds > timerManager.settings.warningThresholdSeconds {
-            return .primary
-        } else if seconds > 0 {
-            return .yellow
-        } else {
-            return .red
         }
     }
 }

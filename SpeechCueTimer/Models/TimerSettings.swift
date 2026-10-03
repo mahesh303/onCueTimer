@@ -43,16 +43,6 @@ import SwiftUI
             : true
     }
 
-    func getTimeColor() -> Color {
-        if remainingSeconds > warningThresholdSeconds {
-            return .primary
-        } else if remainingSeconds > 0 {
-            return .yellow
-        } else {
-            return .red
-        }
-    }
-
     func formatTime(_ seconds: Int) -> String {
         let absSeconds = abs(seconds)
         let h = absSeconds / 3600

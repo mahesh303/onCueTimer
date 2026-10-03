@@ -9,7 +9,11 @@ import SwiftUI
     var displayMessage: String = ""
     var isTimerRunning: Bool = false
     var presets: [String?] = Array(repeating: nil, count: 4)
-    
+
+    var isExternalDisplayConnected: Bool {
+        displayManager.externalWindow != nil
+    }
+
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
         self.displayManager = DisplayManager(timerManager: timerManager)
@@ -69,7 +73,13 @@ import SwiftUI
                                      from: nil, 
                                      for: nil)
     }
-    
+
+    /// Takes the message off the speaker display but keeps the draft being typed.
+    func hideMessage() {
+        displayMessage = ""
+        displayManager.message = ""
+    }
+
     // MARK: - Preset Management
     
     func loadPreset(at index: Int) {
@@ -87,6 +97,16 @@ import SwiftUI
         presets[index] = message
         // No longer saving to UserDefaults - presets are session-only
         feedbackGenerator.impactOccurred(intensity: 1.0)
+    }
+
+    /// Sends a saved message straight to the display without touching the draft.
+    func sendPreset(at index: Int) {
+        guard index >= 0 && index < presets.count else { return }
+        guard let preset = presets[index] else { return }
+
+        displayMessage = preset
+        displayManager.message = preset
+        feedbackGenerator.impactOccurred(intensity: 0.5)
     }
     
 }
