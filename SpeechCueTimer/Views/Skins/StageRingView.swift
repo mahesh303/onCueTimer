@@ -13,6 +13,7 @@ struct StageRingView: View {
     let viewModel: ContentViewModel
     let showCursor: Bool
     @Binding var isKeyboardVisible: Bool
+    let onOpenHelp: () -> Void
     let onOpenSettings: () -> Void
 
     @State private var fontSizeManager = FontSizeManager.shared
@@ -71,7 +72,7 @@ struct StageRingView: View {
                     .font(.system(size: 26, weight: .bold))
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
-                SettingsGearButton(action: onOpenSettings)
+                HeaderButtons(onHelp: onOpenHelp, onSettings: onOpenSettings)
             }
             .frame(height: 48)
 

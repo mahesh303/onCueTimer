@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Hosts the operator screen in the chosen skin, plus everything shared between
-/// skins: the floating keyboard, the blinking cursor and the Settings sheet.
+/// skins: the floating keyboard, the blinking cursor, and the Settings and Help sheets.
 struct ContentView: View {
     let timerManager: TimerManager
     // @State ensures ContentViewModel is created once and SwiftUI tracks its @Observable changes.
@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var isKeyboardVisible = false
     @State private var showCursor = false
     @State private var showSettings = false
+    @State private var showHelp = false
     @AppStorage(AppSkin.storageKey) private var skin: AppSkin = .glassConsole
 
     init(timerManager: TimerManager) {
@@ -34,6 +35,7 @@ struct ContentView: View {
                     viewModel: viewModel,
                     showCursor: showCursor,
                     isKeyboardVisible: $isKeyboardVisible,
+                    onOpenHelp: { showHelp = true },
                     onOpenSettings: { showSettings = true }
                 )
             case .stageRing:
@@ -42,6 +44,7 @@ struct ContentView: View {
                     viewModel: viewModel,
                     showCursor: showCursor,
                     isKeyboardVisible: $isKeyboardVisible,
+                    onOpenHelp: { showHelp = true },
                     onOpenSettings: { showSettings = true }
                 )
             }
@@ -93,6 +96,10 @@ struct ContentView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
+        .sheet(isPresented: $showHelp) {
+            HelpView()
+        }
+        .speakerDisplayAccessory(timerManager: timerManager, displayManager: viewModel.displayManager)
     }
 
     private func handleKeyTap(_ key: String) {

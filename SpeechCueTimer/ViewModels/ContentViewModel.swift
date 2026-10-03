@@ -2,7 +2,7 @@ import SwiftUI
 
 @Observable final class ContentViewModel {
     private let timerManager: TimerManager
-    private let displayManager: DisplayManager
+    let displayManager: DisplayManager
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     
     var message: String = ""
@@ -11,7 +11,7 @@ import SwiftUI
     var presets: [String?] = Array(repeating: nil, count: 4)
 
     var isExternalDisplayConnected: Bool {
-        displayManager.externalWindow != nil
+        displayManager.isExternalDisplayConnected
     }
 
     init(timerManager: TimerManager) {
