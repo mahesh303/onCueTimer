@@ -45,7 +45,7 @@ struct FloatingKeyboard: View {
         ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
         ["⇧", "Z", "X", "C", "V", "B", "N", "M", "⌫"],
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-        ["😀", "Space", "Done"]
+        ["😀", "Space", "Return", "Done"]
     ]
 
     private let lowercaseKeys = [
@@ -53,7 +53,7 @@ struct FloatingKeyboard: View {
         ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
         ["⇧", "z", "x", "c", "v", "b", "n", "m", "⌫"],
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-        ["😀", "Space", "Done"]
+        ["😀", "Space", "Return", "Done"]
     ]
 
     private var currentKeys: [[String]] {
@@ -178,23 +178,31 @@ struct FloatingKeyboard: View {
                                         handleKeyInput(key)
                                     }
                                 }) {
-                                    Text(key == "Space" ? "⎵" : key)
-                                        .font(.system(size: 21, weight: .medium))
-                                        .foregroundColor(.primary)
-                                        .frame(
-                                            width: key == "Space" ? 105 : (key == "Done" ? 79 : 44),
-                                            height: 44
-                                        )
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(
-                                                    key == "Done" ? Color.blue.opacity(0.2) :
-                                                    key == "😀" ? Color.yellow.opacity(0.3) :
-                                                    key == "⇧" ? (isUppercase ? Color.green.opacity(0.3) : Color.gray.opacity(0.3)) :
-                                                    Color.gray.opacity(0.3)
-                                                )
-                                                .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
-                                        )
+                                    Group {
+                                        if key == "Return" {
+                                            Image(systemName: "return")
+                                                .font(.system(size: 18, weight: .semibold))
+                                        } else {
+                                            Text(key == "Space" ? "⎵" : key)
+                                                .font(.system(size: 21, weight: .medium))
+                                        }
+                                    }
+                                    .foregroundColor(.primary)
+                                    .frame(
+                                        width: key == "Space" ? 135 : (key == "Done" ? 75 : (key == "Return" ? 60 : 44)),
+                                        height: 44
+                                    )
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(
+                                                key == "Done" ? Color.blue.opacity(0.2) :
+                                                key == "Return" ? Color.blue.opacity(0.15) :
+                                                key == "😀" ? Color.yellow.opacity(0.3) :
+                                                key == "⇧" ? (isUppercase ? Color.green.opacity(0.3) : Color.gray.opacity(0.3)) :
+                                                Color.gray.opacity(0.3)
+                                            )
+                                            .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
+                                    )
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
@@ -226,6 +234,11 @@ struct FloatingKeyboard: View {
             currentWord = ""
             suggestions = []
             isUppercase = true // Auto-capitalize after space
+        } else if key == "Return" {
+            onKeyTap("\n")
+            currentWord = ""
+            suggestions = []
+            isUppercase = true // Auto-capitalize on new line
         } else if key.rangeOfCharacter(from: CharacterSet.letters) != nil {
             let letterToAdd = shouldCapitalize() ? key.uppercased() : key.lowercased()
             currentWord += letterToAdd

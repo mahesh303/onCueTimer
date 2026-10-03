@@ -24,6 +24,7 @@ struct MessageDisplayCard: View {
     var cornerRadius: CGFloat = 16
     var verticalPadding: CGFloat = 20
     var horizontalPadding: CGFloat = 24
+    var lineLimit: Int? = 5
 
     /// Incrementing this value re-triggers the keyframe shake animation.
     @State private var shakeClicks: Int = 0
@@ -33,8 +34,8 @@ struct MessageDisplayCard: View {
             .font(.system(size: fontSize, weight: .semibold))
             .foregroundColor(.white)
             .multilineTextAlignment(.center)
-            .lineLimit(3)
-            .minimumScaleFactor(0.5)
+            .lineLimit(lineLimit)
+            .minimumScaleFactor(0.4)
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
             .background(

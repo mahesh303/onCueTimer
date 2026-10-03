@@ -41,38 +41,52 @@ struct ContentView: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.2))
                             
-                            VStack(spacing: 8) {
-                                Spacer()
-                                
-                                TimeDisplay(
-                                    seconds: timerManager.settings.remainingSeconds,
-                                    timerManager: timerManager,
-                                    fontSize: timerFontSize(geometry: geometry, hasMessage: !viewModel.displayMessage.isEmpty)
-                                )
-                                .accessibilityLabel("Timer")
-                                .accessibilityValue(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
-                                .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
-                                .padding(.horizontal, 48) // Safe clearance away from the +/- buttons in the top right
-                                
-                                // Operator preview of what is live on the speaker's screen.
-                                // Uses MessageDisplayCard so the operator sees the same
-                                // blue card styling and zap shake animation.
-                                if !viewModel.displayMessage.isEmpty {
-                                    Spacer().frame(height: 4)
+                            VStack(spacing: 0) {
+                                if viewModel.displayMessage.isEmpty {
+                                    Spacer()
+                                    
+                                    TimeDisplay(
+                                        seconds: timerManager.settings.remainingSeconds,
+                                        timerManager: timerManager,
+                                        fontSize: timerFontSize(geometry: geometry, hasMessage: false)
+                                    )
+                                    .accessibilityLabel("Timer")
+                                    .accessibilityValue(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
+                                    .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
+                                    .padding(.horizontal, 48)
+                                    
+                                    Spacer()
+                                } else {
+                                    // Position timer higher in the card
+                                    Spacer().frame(height: 12)
+                                    
+                                    TimeDisplay(
+                                        seconds: timerManager.settings.remainingSeconds,
+                                        timerManager: timerManager,
+                                        fontSize: timerFontSize(geometry: geometry, hasMessage: true)
+                                    )
+                                    .accessibilityLabel("Timer")
+                                    .accessibilityValue(timerManager.settings.formatTime(timerManager.settings.remainingSeconds))
+                                    .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
+                                    .padding(.horizontal, 48)
+                                    
+                                    // Spaced out from the message text below
+                                    Spacer().frame(height: 22)
 
                                     MessageDisplayCard(
                                         message: viewModel.displayMessage,
                                         fontSize: messageFontSize(geometry: geometry),
                                         cornerRadius: 10,
-                                        verticalPadding: 12,
-                                        horizontalPadding: 16
+                                        verticalPadding: 10,
+                                        horizontalPadding: 16,
+                                        lineLimit: 4
                                     )
                                     .padding(.horizontal, 16)
                                     .frame(maxWidth: .infinity)
                                     .accessibilityLabel("Currently displayed message")
+                                    
+                                    Spacer()
                                 }
-
-                                Spacer()
                             }
                             .padding()
                             .animation(.easeInOut(duration: 0.2), value: fontSizeManager.currentScale)
@@ -288,31 +302,27 @@ struct ContentView: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.2))
                             
-                            ZStack(alignment: .topLeading) {
-                                // Background text area
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.clear)
-                                    .frame(height: 120)
-                                
-                                // Display text with cursor
-                                ScrollView {
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        HStack(alignment: .top, spacing: 0) {
-                                            if viewModel.message.isEmpty && !isKeyboardVisible {
-                                                Text("Enter message")
-                                                    .foregroundColor(.gray)
-                                            } else {
-                                                Text(viewModel.message + (showCursor ? "|" : ""))
-                                                    .foregroundColor(.primary)
-                                            }
-                                            Spacer()
-                                        }
-                                        Spacer()
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 0) {
+                                    if viewModel.message.isEmpty && !isKeyboardVisible {
+                                        Text("Enter message")
+                                            .foregroundColor(.gray)
+                                            .font(.body)
+                                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                                    } else {
+                                        Text(viewModel.message + (showCursor ? "|" : ""))
+                                            .foregroundColor(.primary)
+                                            .font(.body)
+                                            .lineLimit(nil)
+                                            .multilineTextAlignment(.leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                            .frame(maxWidth: .infinity, alignment: .topLeading)
                                     }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
-                                .padding(8)
+                                .padding(10)
                             }
+                            .frame(height: 130)
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 // Show our floating keyboard. The .task(id: isKeyboardVisible)
                                 // modifier on the body handles cursor animation.
@@ -321,7 +331,7 @@ struct ContentView: View {
                             .accessibilityLabel("Message input")
                             .accessibilityValue(viewModel.message.isEmpty ? "No message" : viewModel.message)
                         }
-                        .frame(height: 120)
+                        .frame(height: 130)
                         
                         // Preset buttons
                         HStack {
@@ -427,6 +437,9 @@ struct ContentView: View {
             if !viewModel.message.isEmpty {
                 viewModel.message.removeLast()
             }
+        } else if key == "Return" || key == "\n" {
+            // Newline for multi-line messages
+            viewModel.message += "\n"
         } else {
             // Regular character input
             viewModel.message += key
