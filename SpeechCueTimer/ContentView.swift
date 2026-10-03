@@ -70,8 +70,8 @@ struct ContentView: View {
                                     .accessibilityHint(viewModel.isTimerRunning ? "Timer is running" : "Timer is stopped")
                                     .padding(.horizontal, 48)
                                     
-                                    // Spaced out from the message text below
-                                    Spacer().frame(height: 22)
+                                    // Spaced out generously from the message text below
+                                    Spacer().frame(minHeight: 44, idealHeight: 56, maxHeight: 68)
 
                                     MessageDisplayCard(
                                         message: viewModel.displayMessage,
