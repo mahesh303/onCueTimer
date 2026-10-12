@@ -3,10 +3,16 @@ import SwiftUI
 @Observable final class ContentViewModel {
     private let timerManager: TimerManager
     let displayManager: DisplayManager
+    let sync: SyncManager
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     
     var message: String = ""
-    var displayMessage: String = ""
+    /// What the speaker display shows. Lives on DisplayManager so a message sent
+    /// from another synced iPad shows up here too.
+    var displayMessage: String {
+        get { displayManager.message }
+        set { displayManager.message = newValue }
+    }
     var isTimerRunning: Bool = false
     var presets: [String?] = Array(repeating: nil, count: 4)
 
@@ -18,6 +24,7 @@ import SwiftUI
         self.timerManager = timerManager
         self.displayManager = DisplayManager(timerManager: timerManager)
         self.timerManager.displayManager = displayManager
+        self.sync = SyncManager(engine: SyncEngine(timerManager: timerManager, displayManager: displayManager))
 
         feedbackGenerator.prepare()
         // Message presets are session-only (not persisted across launches).
@@ -61,12 +68,10 @@ import SwiftUI
     func clearMessage() {
         message = ""
         displayMessage = ""
-        displayManager.message = ""
     }
     
     func sendMessage() {
         displayMessage = message
-        displayManager.message = message
         // Dismiss keyboard
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), 
                                      to: nil, 
@@ -77,7 +82,6 @@ import SwiftUI
     /// Takes the message off the speaker display but keeps the draft being typed.
     func hideMessage() {
         displayMessage = ""
-        displayManager.message = ""
     }
 
     // MARK: - Preset Management
@@ -105,7 +109,6 @@ import SwiftUI
         guard let preset = presets[index] else { return }
 
         displayMessage = preset
-        displayManager.message = preset
         feedbackGenerator.impactOccurred(intensity: 0.5)
     }
     

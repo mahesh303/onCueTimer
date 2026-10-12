@@ -15,6 +15,7 @@ struct FloatingKeyboard: View {
     @State private var currentWord = ""
     @State private var suggestions: [String] = []
     @State private var showEmojiKeyboard = false
+    /// Index into `EmojiCatalog.categories`; -1 is Recents.
     @State private var selectedEmojiCategory = 0
 
     // Common word dictionary for suggestions
@@ -22,23 +23,13 @@ struct FloatingKeyboard: View {
         "the", "and", "for", "are", "but", "not", "you", "all", "can", "had", "her", "was", "one", "our", "out", "day", "get", "has", "him", "his", "how", "its", "may", "new", "now", "old", "see", "two", "who", "boy", "did", "man", "way", "what", "when", "where", "will", "with", "work", "your", "about", "after", "again", "back", "been", "before", "being", "both", "came", "come", "could", "each", "first", "from", "give", "good", "great", "hand", "here", "into", "just", "know", "last", "left", "life", "like", "live", "look", "made", "make", "many", "most", "move", "much", "must", "name", "need", "next", "only", "over", "part", "play", "place", "right", "said", "same", "seem", "show", "small", "such", "take", "than", "that", "their", "them", "there", "these", "they", "thing", "think", "this", "those", "through", "time", "today", "together", "under", "until", "very", "want", "water", "well", "went", "were", "where", "which", "while", "world", "would", "write", "year", "years", "young"
     ]
 
-    // Emoji categories
-    private let emojiCategories = ["😀", "🎉", "❤️", "🍕", "🚗", "⚽"]
+    // Most recent first, space-separated; kept across launches like the system keyboard's.
+    @AppStorage("recentEmoji") private var recentEmojiStorage = ""
+    private static let recentLimit = 32
 
-    private let emojiSets = [
-        // Faces & People
-        ["😀", "😃", "😄", "😁", "😅", "😂", "🤣", "😊", "😇", "🙂", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳"],
-        // Activities & Celebrations
-        ["🎉", "🎊", "🎈", "🎁", "🎂", "🎄", "🎆", "🎇", "✨", "🎯", "🎪", "🎨", "🎭", "🎮", "🎲", "🎸", "🎺", "🎤", "🎧", "🎵", "🎶", "🎼", "🏆", "🥇", "🥈", "🥉", "🏅", "🎗️"],
-        // Hearts & Love
-        ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "☮️", "✝️", "☪️", "🕉️", "☸️", "✡️", "🔯", "🕎", "☯️"],
-        // Food & Drinks
-        ["🍕", "🍔", "🌭", "🥪", "🌮", "🌯", "🥙", "🧆", "🥚", "🍳", "🥘", "🍲", "🥗", "🍿", "🧈", "🧄", "🧅", "🍄", "🥜", "🌰", "🍞", "🥐", "🥖", "🥨", "🥯", "🥞", "🧇", "🍰"],
-        // Transport & Travel
-        ["🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒", "🚐", "🛻", "🚚", "🚛", "🚜", "🏍️", "🛵", "🚲", "🛴", "🛹", "🚁", "✈️", "🛫", "🛬", "🚀", "🛸", "🚢", "⛵", "🚤"],
-        // Sports & Games
-        ["⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🏉", "🎱", "🏓", "🏸", "🥅", "⛳", "🏹", "🎣", "🥊", "🥋", "🎽", "🛹", "🛷", "⛸️", "🥌", "🎿", "⛷️", "🏂", "🏋️", "🤸", "🤼", "🤽"]
-    ]
+    private var recentEmoji: [String] {
+        recentEmojiStorage.split(separator: " ").map(String.init)
+    }
 
     private let uppercaseKeys = [
         ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -63,43 +54,8 @@ struct FloatingKeyboard: View {
     var body: some View {
         VStack(spacing: 10) {
             if showEmojiKeyboard {
-                // Emoji category selector
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(0..<emojiCategories.count, id: \.self) { index in
-                            Button(action: {
-                                selectedEmojiCategory = index
-                            }) {
-                                Text(emojiCategories[index])
-                                    .font(.system(size: 22))
-                                    .frame(width: 44, height: 44)
-                                    .background(
-                                        Circle()
-                                            .fill(selectedEmojiCategory == index ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                                    )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                }
-                .frame(height: 44)
-
-                // Emoji grid
-                let emojis = emojiSets[selectedEmojiCategory]
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 7), spacing: 13) {
-                    ForEach(emojis, id: \.self) { emoji in
-                        Button(action: {
-                            onKeyTap(emoji)
-                        }) {
-                            Text(emoji)
-                                .font(.system(size: 27))
-                                .frame(width: 44, height: 44)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .frame(height: 200)
+                emojiCategoryBar
+                emojiGrid
 
                 // Control row for emoji mode
                 HStack {
@@ -173,6 +129,8 @@ struct FloatingKeyboard: View {
                                     } else if key == "⇧" {
                                         isUppercase.toggle()
                                     } else if key == "😀" {
+                                        // Open on Recents once there are some, like the system keyboard.
+                                        selectedEmojiCategory = recentEmoji.isEmpty ? 0 : -1
                                         showEmojiKeyboard = true
                                     } else {
                                         handleKeyInput(key)
@@ -219,6 +177,85 @@ struct FloatingKeyboard: View {
         )
         .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 8)
         .frame(maxWidth: 490)
+    }
+
+    // MARK: - Emoji
+
+    private var emojiCategoryBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 4) {
+                emojiCategoryButton(index: -1, systemImage: "clock", name: "Recents")
+                ForEach(Array(EmojiCatalog.categories.enumerated()), id: \.element.id) { index, category in
+                    emojiCategoryButton(index: index, systemImage: category.systemImage, name: category.name)
+                }
+            }
+            .padding(.horizontal, 4)
+        }
+        .frame(height: 40)
+    }
+
+    private func emojiCategoryButton(index: Int, systemImage: String, name: String) -> some View {
+        let isSelected = selectedEmojiCategory == index
+
+        return Button {
+            selectedEmojiCategory = index
+        } label: {
+            Image(systemName: systemImage)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(isSelected ? Color.primary : Color.secondary)
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(isSelected ? Color.blue.opacity(0.3) : Color.clear))
+        }
+        .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel(name)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private var emojiGrid: some View {
+        let isRecents = selectedEmojiCategory < 0
+        let categories = EmojiCatalog.categories
+        let category = categories.indices.contains(selectedEmojiCategory) ? categories[selectedEmojiCategory] : nil
+        let emojis = isRecents ? recentEmoji : (category?.emoji ?? [])
+
+        return VStack(alignment: .leading, spacing: 6) {
+            Text(isRecents ? "Recently used" : (category?.name ?? ""))
+                .font(.caption.weight(.semibold))
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+
+            if emojis.isEmpty {
+                Text(isRecents ? "Emoji you use show up here." : "No emoji available.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 8), spacing: 4) {
+                        ForEach(emojis, id: \.self) { emoji in
+                            Button {
+                                onKeyTap(emoji)
+                                rememberEmoji(emoji)
+                            } label: {
+                                Text(emoji)
+                                    .font(.system(size: 30))
+                                    .frame(width: 48, height: 48)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+                // New identity per category so switching starts at the top.
+                .id(selectedEmojiCategory)
+            }
+        }
+        .frame(height: 230)
+    }
+
+    private func rememberEmoji(_ emoji: String) {
+        var recents = recentEmoji.filter { $0 != emoji }
+        recents.insert(emoji, at: 0)
+        recentEmojiStorage = recents.prefix(Self.recentLimit).joined(separator: " ")
     }
 
     private func handleKeyInput(_ key: String) {
