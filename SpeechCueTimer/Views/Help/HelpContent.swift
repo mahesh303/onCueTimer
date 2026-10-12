@@ -93,7 +93,7 @@ enum HelpContent {
                         .legend([
                             HelpSwatch(color: SkinColor.green, title: "White digits, green progress", detail: "The timer is running and there's plenty of time left."),
                             HelpSwatch(color: SkinColor.yellow, title: "Yellow", detail: "Wrap-up time: the time left has reached your **Warn at** setting."),
-                            HelpSwatch(color: SkinColor.red, title: "Red", detail: "Time is up. The timer keeps counting past zero with a minus sign, for example −00:35, so you can see how far over the talk has run."),
+                            HelpSwatch(color: SkinColor.red, title: "Red", detail: "Time is up. The timer keeps counting past zero with a minus sign, for example −00:35, so you can see how far over the talk has run. With **Stop at zero** on, it stops at 00:00 instead."),
                         ]),
                     ]),
                     HelpSection(heading: "Text size", items: [
@@ -200,7 +200,7 @@ enum HelpContent {
                         ]),
                     ]),
                     HelpSection(heading: "The keyboard", items: [
-                        .paragraph("Word suggestions appear above the keys as you type. The smiley key opens emoji. Tap **Done**, or anywhere outside the keyboard, to close it."),
+                        .paragraph("Word suggestions appear above the keys as you type. The smiley key opens every emoji, sorted into categories like the iPad's own keyboard. The clock tab keeps the ones you've used recently. Tap **Done**, or anywhere outside the keyboard, to close it."),
                     ]),
                 ]
             ),
@@ -240,13 +240,14 @@ enum HelpContent {
                 sections: [
                     HelpSection(items: [
                         .paragraph(isGlass
-                            ? "The **Warning** section is in the right-hand panel."
+                            ? "The **Warning & overtime** section is in the right-hand panel."
                             : "Open **Timer settings** in the right-hand panel."),
                         .rows([
                             HelpRow(systemImage: "exclamationmark.triangle.fill", title: "Warn at", detail: "When this much time is left, the timer and progress turn yellow. Use **−** and **+** to change it in 30-second steps, from 0:10 up to 10:00. The default is 1:00."),
                             HelpRow(systemImage: "waveform", title: "Pulse during warning", detail: "Makes the countdown zoom gently in and out while it's yellow, so the speaker notices. Turn it off for a calmer display."),
+                            HelpRow(systemImage: "stop.fill", title: "Stop at zero", detail: "When time runs out, the timer stops at 00:00 and turns red instead of counting into minus time. Off by default."),
                         ]),
-                        .tip("Both settings are remembered the next time you open the app."),
+                        .tip("These settings are remembered the next time you open the app."),
                     ]),
                 ]
             ),
@@ -272,6 +273,35 @@ enum HelpContent {
                         ]),
                         .paragraph("The operator screen and the speaker display both change straight away. Your timer and messages carry on."),
                     ]),
+                    HelpSection(heading: "Background colour", items: [
+                        .paragraph("Under **Speaker background** in the same Settings sheet, pick one of the dark colours or tap **Custom colour** to choose your own. It changes the colour behind the timer on the speaker display and the preview. If you pick a colour too light to read white digits on, Settings warns you."),
+                    ]),
+                ]
+            ),
+
+            HelpTopic(
+                id: "sync",
+                title: "Sync between iPads",
+                summary: "Run one show from several iPads.",
+                systemImage: "arrow.triangle.2.circlepath",
+                tint: SkinColor.green,
+                iconForeground: SkinColor.onGreen,
+                sections: [
+                    HelpSection(items: [
+                        .paragraph("Link two or more iPads so they show the same countdown and message. Every linked iPad can start, pause, change the time and send messages; the last change wins. Each iPad can drive its own speaker display."),
+                    ]),
+                    HelpSection(heading: "Link iPads", items: [
+                        .steps([
+                            "On the first iPad, tap the **Sync** button (two circling arrows) at the top of the screen and turn on **Sync with other iPads**. Note the 4-digit **show code**.",
+                            "On each other iPad, open **Sync**, turn it on and enter the same code.",
+                            "The Sync button shows a yellow dot while it looks for the others, then a green dot and the number of other iPads linked.",
+                        ]),
+                        .tip("Give each iPad a name under **This iPad**, such as FOH or Stage left, so you can tell them apart in the list."),
+                    ]),
+                    HelpSection(heading: "What's shared", items: [
+                        .paragraph("The timer, the message on the speaker display, Zap, and the **Warn at**, **Pulse** and **Stop at zero** settings. Skin, background colour, text size and saved messages stay separate on each iPad."),
+                        .paragraph("An iPad that joins later picks up the show that's already running."),
+                    ]),
                 ]
             ),
 
@@ -288,6 +318,7 @@ enum HelpContent {
                             HelpRow(title: "I can't change the time", detail: "Setting the time and quick times are locked while the timer runs. Pause first."),
                             HelpRow(title: "The speaker display is blank, or the app says No display", detail: "Check the cable or screen mirroring. The app finds the screen automatically when it connects."),
                             HelpRow(title: "My message disappeared", detail: "Starting the timer clears the message from the speaker display. Send it again after you press **Start**."),
+                            HelpRow(title: "The Sync button stays yellow", detail: "It hasn't found another iPad yet. Check that every iPad uses the same show code, has Wi-Fi and Bluetooth turned on, and has the app open. If iOS asked about **Local Network** access, allow it under **Settings › Privacy & Security › Local Network**."),
                             HelpRow(title: "Zap does nothing", detail: "Zap only works while a message is on the speaker display."),
                             HelpRow(title: "The screen turned off during a talk", detail: "The iPad locked itself. Before an event, open the iPad's **Settings › Display & Brightness › Auto-Lock** and choose **Never**."),
                         ]),

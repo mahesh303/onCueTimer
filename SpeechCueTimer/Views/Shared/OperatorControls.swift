@@ -70,13 +70,52 @@ struct DisplayStatusPill: View {
                 .frame(width: 8, height: 8)
             Image(systemName: "display")
             Text(isConnected ? "Display connected" : "No display")
+                .lineLimit(1)
         }
+        .fixedSize()
         .font(.system(size: 15, weight: .medium))
         .foregroundStyle(SkinColor.primaryText)
         .padding(.horizontal, 16)
         .frame(height: 44)
         .skinGlass(in: Capsule())
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Sync state at a glance; opens the Sync sheet. Kept compact so the header fits:
+/// no dot when off, a yellow dot while looking for other iPads, and a green dot
+/// with the number of linked iPads once connected.
+struct SyncStatusButton: View {
+    let sync: SyncManager
+    let action: () -> Void
+
+    var body: some View {
+        let peers = sync.connectedPeerNames.count
+
+        Button(action: action) {
+            HStack(spacing: 8) {
+                if sync.isEnabled {
+                    Circle()
+                        .fill(peers == 0 ? SkinColor.yellow : SkinColor.green)
+                        .frame(width: 8, height: 8)
+                }
+                Image(systemName: "arrow.triangle.2.circlepath")
+                if peers > 0 {
+                    Text("\(peers)")
+                        .monospacedDigit()
+                }
+            }
+            .font(.system(size: 15, weight: .medium))
+            .foregroundStyle(SkinColor.primaryText)
+            .padding(.horizontal, sync.isEnabled ? 14 : 0)
+            .frame(minWidth: 44, minHeight: 44)
+            .fixedSize()
+            .skinGlass(in: Capsule(), interactive: true)
+        }
+        .buttonStyle(SkinPressStyle())
+        .accessibilityLabel("Sync")
+        .accessibilityValue(!sync.isEnabled ? "Off" : (peers == 0 ? "Searching for other iPads" : "Connected to \(peers) iPad\(peers == 1 ? "" : "s")"))
+        .accessibilityHint("Opens sync settings")
     }
 }
 
@@ -167,7 +206,7 @@ struct MessageComposerField: View {
     }
 }
 
-/// "Warn at" stepper and pulse toggle, grouped like an iOS Settings section.
+/// "Warn at" stepper, pulse toggle and stop-at-zero toggle, grouped like an iOS Settings section.
 struct WarningSettingsCard: View {
     let timerManager: TimerManager
 
@@ -223,6 +262,20 @@ struct WarningSettingsCard: View {
                 Toggle("Pulse during warning", isOn: $settings.pulseAnimationEnabled)
                     .tint(SkinColor.green)
                     .accessibilityHint("When on, the timer zooms in and out to alert the speaker during the warning period")
+            }
+            .padding(.horizontal, 14)
+            .frame(minHeight: 60)
+
+            Rectangle()
+                .fill(Color.white.opacity(0.08))
+                .frame(height: 1)
+                .padding(.leading, 56)
+
+            HStack(spacing: 12) {
+                SettingsRowIcon(systemImage: "stop.fill", tint: SkinColor.red, foreground: .white)
+                Toggle("Stop at zero", isOn: $settings.stopsAtZero)
+                    .tint(SkinColor.green)
+                    .accessibilityHint("When on, the timer stops at 00:00 instead of counting into negative overtime")
             }
             .padding(.horizontal, 14)
             .frame(minHeight: 60)

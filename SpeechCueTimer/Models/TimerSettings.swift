@@ -25,6 +25,14 @@ import SwiftUI
         }
     }
 
+    // When true, the countdown holds at 00:00 and stops instead of counting into
+    // negative overtime. Off by default so existing setups keep counting past zero.
+    var stopsAtZero: Bool {
+        didSet {
+            UserDefaults.standard.set(stopsAtZero, forKey: "stopsAtZero")
+        }
+    }
+
     init(minutes: Int = 0) {
         let seconds = minutes * 60
         self.totalSeconds = seconds
@@ -41,6 +49,7 @@ import SwiftUI
         self.pulseAnimationEnabled = hasPulseKey
             ? UserDefaults.standard.bool(forKey: "pulseAnimationEnabled")
             : true
+        self.stopsAtZero = UserDefaults.standard.bool(forKey: "stopsAtZero")
     }
 
     func formatTime(_ seconds: Int) -> String {

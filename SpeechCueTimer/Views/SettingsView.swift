@@ -2,14 +2,22 @@
 //  SettingsView.swift
 //  SpeechCueTimer
 //
-//  Opened from the gear button. Lets the operator choose the app's skin.
+//  Opened from the gear button. Lets the operator choose the app's skin and the speaker background.
 //
 
 import SwiftUI
 
 struct SettingsView: View {
     @AppStorage(AppSkin.storageKey) private var skin: AppSkin = .glassConsole
+    @AppStorage(SpeakerBackground.storageKey) private var backgroundHex = SpeakerBackground.defaultHex
     @Environment(\.dismiss) private var dismiss
+
+    private var customColor: Binding<Color> {
+        Binding(
+            get: { SpeakerBackground.color(fromHex: backgroundHex) },
+            set: { backgroundHex = SpeakerBackground.hex(from: $0) }
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -28,6 +36,28 @@ struct SettingsView: View {
                     Text("Skin")
                 } footer: {
                     Text("Changes both this screen and the speaker display. Timer and messages are kept.")
+                }
+
+                Section {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 8), spacing: 12) {
+                        ForEach(SpeakerBackground.presets) { preset in
+                            BackgroundSwatch(preset: preset, isSelected: backgroundHex == preset.hex) {
+                                backgroundHex = preset.hex
+                            }
+                        }
+                    }
+                    .padding(.vertical, 6)
+
+                    ColorPicker("Custom colour", selection: customColor, supportsOpacity: false)
+                } header: {
+                    Text("Speaker background")
+                } footer: {
+                    if SpeakerBackground.isTooLightForWhiteText(backgroundHex) {
+                        Label("This colour is too light for the white timer digits to read clearly from the stage.", systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(SkinColor.yellow)
+                    } else {
+                        Text("The colour behind the timer on the speaker display and the preview.")
+                    }
                 }
             }
             .navigationTitle("Settings")
@@ -78,6 +108,27 @@ private struct SkinOptionCard: View {
         .accessibilityLabel(skin.title)
         .accessibilityValue(isSelected ? "Selected" : "")
         .accessibilityHint(skin.summary)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+private struct BackgroundSwatch: View {
+    let preset: SpeakerBackground.Preset
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Circle()
+                .fill(preset.color)
+                .overlay(Circle().strokeBorder(Color.white.opacity(0.25), lineWidth: 1))
+                .padding(4)
+                .overlay(Circle().strokeBorder(isSelected ? SkinColor.blue : .clear, lineWidth: 2.5))
+                .frame(width: 44, height: 44)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(SkinPressStyle())
+        .accessibilityLabel(preset.name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

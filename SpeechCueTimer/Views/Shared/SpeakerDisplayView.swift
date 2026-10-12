@@ -14,13 +14,16 @@ struct SpeakerDisplayView: View {
     let timerManager: TimerManager
     let message: String
     let fontScale: Double
+    // Same key the Settings sheet writes, so the speaker screen and every preview update together.
+    @AppStorage(SpeakerBackground.storageKey) private var backgroundHex = SpeakerBackground.defaultHex
 
     var body: some View {
         // All sizes are relative to the view's height, so it renders the same on a
         // 1080p screen and in a small preview card.
         GeometryReader { geometry in
             ZStack {
-                Color.black
+                SpeakerBackground.color(fromHex: backgroundHex)
+                    .animation(.easeInOut(duration: 0.3), value: backgroundHex)
 
                 switch skin {
                 case .glassConsole:

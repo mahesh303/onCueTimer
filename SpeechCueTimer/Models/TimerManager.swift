@@ -9,8 +9,8 @@ import UIKit
     // Core state
     var settings: TimerSettings
     
-    // Timer calculation state
-    private var targetDate: Date?
+    // Timer calculation state. Read by SyncEngine to share a running countdown.
+    private(set) var targetDate: Date?
     
     // Add a property to track which preset is currently running
     private var activePresetNumber: Int? = nil
@@ -141,40 +141,113 @@ import UIKit
     
     private func updateTimer() {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self, let target = self.targetDate else { return }
-            
-            let timeLeft = target.timeIntervalSince(Date())
-            // ceil to match typical timer behavior (2.1s is 3s display usually, or floor? 
-            // formatTime typically floors? Wait. 2:00 -> 1:59 immediately? 
-            // If I have 10s. start. target is +10. now is 0. diff is 10.
-            // 0.1s later: diff is 9.9. 
-            // If I floor, it's 9. 
-            // If I ceil, it's 10.
-            // Usually timers stay on "10" for the first second. So ceil is correct for visual "10... 9...".
-            
-            let ceilSeconds = Int(ceil(timeLeft))
-            
-            // Note: If timeLeft is negative (overtime), ceil still works correctly (-0.1 -> 0, -1.1 -> -1)
-            // Wait. ceil(-0.1) is 0. ceil(-1.1) is -1.
-            // This seems fine.
-            
-            // Only update if the integer value changed
-            if self.settings.remainingSeconds != ceilSeconds {
-                self.settings.remainingSeconds = ceilSeconds
-                
-                // Update warning state based on user-configured threshold
-                if self.settings.remainingSeconds <= 0 {
-                    self.settings.timerState = .overtime
-                } else if self.settings.remainingSeconds <= self.settings.warningThresholdSeconds {
-                    self.settings.timerState = .warning
-                }
-                
-                // Notify external display
-                NotificationCenter.default.post(name: .timerStateChanged, object: nil)
-            }
+            self?.refreshRemaining()
         }
     }
-    
+
+    private func refreshRemaining() {
+        guard let target = targetDate else { return }
+        let timeLeft = target.timeIntervalSince(Date())
+        // ceil to match typical timer behavior (2.1s is 3s display usually, or floor? 
+        // formatTime typically floors? Wait. 2:00 -> 1:59 immediately? 
+        // If I have 10s. start. target is +10. now is 0. diff is 10.
+        // 0.1s later: diff is 9.9. 
+        // If I floor, it's 9. 
+        // If I ceil, it's 10.
+        // Usually timers stay on "10" for the first second. So ceil is correct for visual "10... 9...".
+        
+        let ceilSeconds = Int(ceil(timeLeft))
+
+        if ceilSeconds <= 0 && settings.stopsAtZero {
+            stopAtZero()
+            return
+        }
+
+        // Note: If timeLeft is negative (overtime), ceil still works correctly (-0.1 -> 0, -1.1 -> -1)
+        // Wait. ceil(-0.1) is 0. ceil(-1.1) is -1.
+        // This seems fine.
+        
+        // Only update if the integer value changed
+        if settings.remainingSeconds != ceilSeconds {
+            settings.remainingSeconds = ceilSeconds
+            
+            // Update warning state based on user-configured threshold
+            if settings.remainingSeconds <= 0 {
+                settings.timerState = .overtime
+            } else if settings.remainingSeconds <= settings.warningThresholdSeconds {
+                settings.timerState = .warning
+            }
+            
+            // Notify external display
+            NotificationCenter.default.post(name: .timerStateChanged, object: nil)
+        }
+    }
+
+    /// Ends a run at 00:00 when "Stop at zero" is on, instead of counting into overtime.
+    private func stopAtZero() {
+        timer?.invalidate()
+        timer = nil
+        targetDate = nil
+
+        BackgroundAudioManager.shared.stopSilentAudio()
+        endBackgroundTask()
+
+        settings.remainingSeconds = 0
+        settings.isRunning = false
+        settings.timerState = .overtime
+
+        NotificationCenter.default.post(name: .timerStateChanged, object: nil)
+    }
+
+    // MARK: - Sync
+
+    /// Adopts a timer state received from another device. `endDate` has already been
+    /// converted to this device's clock. Unlike startTimer, the message is left alone;
+    /// SyncEngine sets it from the same state.
+    func applySyncedState(_ state: SyncState, endDate: Date?) {
+        settings.warningThresholdSeconds = state.warningThresholdSeconds
+        settings.pulseAnimationEnabled = state.pulseAnimationEnabled
+        settings.stopsAtZero = state.stopsAtZero
+        settings.totalSeconds = state.totalSeconds
+        activePresetNumber = nil
+
+        if let endDate {
+            if !settings.isRunning {
+                lastUsedDuration = settings.remainingSeconds
+            }
+            targetDate = endDate
+            settings.isRunning = true
+            settings.timerState = .running
+            if timer == nil {
+                timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+                    self?.updateTimer()
+                }
+            }
+            refreshRemaining()
+            if settings.isRunning && settings.remainingSeconds > 0 && settings.remainingSeconds <= settings.warningThresholdSeconds {
+                settings.timerState = .warning
+            }
+        } else {
+            timer?.invalidate()
+            timer = nil
+            targetDate = nil
+            BackgroundAudioManager.shared.stopSilentAudio()
+            endBackgroundTask()
+
+            settings.isRunning = false
+            settings.remainingSeconds = state.remainingSeconds
+            if state.remainingSeconds == 0 && state.totalSeconds == 0 {
+                settings.timerState = .completed
+            } else if state.remainingSeconds <= 0 {
+                settings.timerState = .overtime
+            } else {
+                settings.timerState = .ready
+            }
+        }
+
+        NotificationCenter.default.post(name: .timerStateChanged, object: nil)
+    }
+
     func setTime(minutes: Int) {
         settings.totalSeconds = minutes * 60
         resetTimer()

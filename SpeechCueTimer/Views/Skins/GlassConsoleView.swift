@@ -15,6 +15,7 @@ struct GlassConsoleView: View {
     @Binding var isKeyboardVisible: Bool
     let onOpenHelp: () -> Void
     let onOpenSettings: () -> Void
+    let onOpenSync: () -> Void
 
     @State private var fontSizeManager = FontSizeManager.shared
     @State private var showDurationPicker = false
@@ -110,6 +111,7 @@ struct GlassConsoleView: View {
 
             DisplayStatusPill(isConnected: viewModel.isExternalDisplayConnected)
             FontScaleControl()
+            SyncStatusButton(sync: viewModel.sync, action: onOpenSync)
             HeaderButtons(onHelp: onOpenHelp, onSettings: onOpenSettings)
         }
         .frame(height: 48)
@@ -407,7 +409,7 @@ struct GlassConsoleView: View {
 
     private var warningSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Warning")
+            Text("Warning & overtime")
                 .font(.title3.bold())
                 .accessibilityAddTraits(.isHeader)
             WarningSettingsCard(timerManager: timerManager)

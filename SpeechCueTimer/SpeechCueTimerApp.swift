@@ -14,6 +14,10 @@ struct SpeechCueTimerApp: App {
     // on any scene refresh.
     @State private var timerManager = TimerManager()
 
+    init() {
+        EmojiCatalog.preload()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView(timerManager: timerManager)

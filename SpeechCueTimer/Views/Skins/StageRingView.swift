@@ -15,6 +15,7 @@ struct StageRingView: View {
     @Binding var isKeyboardVisible: Bool
     let onOpenHelp: () -> Void
     let onOpenSettings: () -> Void
+    let onOpenSync: () -> Void
 
     @State private var fontSizeManager = FontSizeManager.shared
     @State private var showDurationPicker = false
@@ -72,6 +73,7 @@ struct StageRingView: View {
                     .font(.system(size: 26, weight: .bold))
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
+                SyncStatusButton(sync: viewModel.sync, action: onOpenSync)
                 HeaderButtons(onHelp: onOpenHelp, onSettings: onOpenSettings)
             }
             .frame(height: 48)
