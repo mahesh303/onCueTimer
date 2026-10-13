@@ -55,9 +55,12 @@ speaker,timer,countdown,stage,cue,presentation,confidence monitor,event,conferen
 First release.
 
 ## URLs
-- Support URL: https://mahesh303.github.io/onCueTimer/support.html
-- Privacy Policy URL: https://mahesh303.github.io/onCueTimer/privacy.html
-- Marketing URL (optional): https://mahesh303.github.io/onCueTimer/
+- Support URL: https://www.simpleplaypro.com/speechcue-timer/support
+- Privacy Policy URL: https://www.simpleplaypro.com/speechcue-timer/privacy
+- Marketing URL (optional): https://www.simpleplaypro.com/speechcue-timer
+
+The pages live in the simpleplay-website repo (`src/pages/speechcue-timer/`). The old GitHub Pages
+copies in `docs/` now just redirect there.
 
 ## App Privacy (App Store Connect → App Privacy)
 "Do you or your third-party partners collect data from this app?" → **No, we do not collect data from this app.**
