@@ -203,7 +203,8 @@ enum HelpContent {
                         .paragraph("Type a message while the talk is running and leave it in the message box. When the timer reaches 00:00, it goes to the speaker display on its own. If the box is empty, nothing changes."),
                     ]),
                     HelpSection(heading: "The keyboard", items: [
-                        .paragraph("Word suggestions appear above the keys as you type. The smiley key opens every emoji, sorted into categories like the iPad's own keyboard. The clock tab keeps the ones you've used recently. Tap **Done**, or anywhere outside the keyboard, to close it."),
+                        .paragraph("Like the iPad's own keyboard, it capitalises the first letter of a message, a new line or a new sentence, and nothing else. Tap **⇧** for one capital, or double-tap it for caps lock. Touch and hold **Delete** to delete quickly."),
+                        .paragraph("Word suggestions show in the bar above the keys as you type; tap one to finish the word. The smiley key opens every emoji, sorted into categories. The clock tab keeps the ones you've used recently. Tap **Done**, or anywhere outside the keyboard, to close it."),
                     ]),
                 ]
             ),

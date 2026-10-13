@@ -11,7 +11,6 @@ import SwiftUI
 struct StageRingView: View {
     let timerManager: TimerManager
     let viewModel: ContentViewModel
-    let showCursor: Bool
     @Binding var isKeyboardVisible: Bool
     let onOpenHelp: () -> Void
     let onOpenSettings: () -> Void
@@ -348,8 +347,7 @@ struct StageRingView: View {
     private var messageTab: some View {
         VStack(alignment: .leading, spacing: 16) {
             MessageComposerField(
-                message: viewModel.message,
-                showCursor: showCursor,
+                viewModel: viewModel,
                 isEditing: isKeyboardVisible,
                 onTap: { isKeyboardVisible = true }
             )
@@ -389,7 +387,7 @@ struct StageRingView: View {
                         .skinFilled(SkinColor.actionBlue, in: Capsule())
                 }
                 .buttonStyle(SkinPressStyle())
-                .disabled(viewModel.message.isEmpty)
+                .disabled(!viewModel.hasDraft)
                 .accessibilityHint("Send the current message to display")
             }
 
@@ -418,7 +416,7 @@ struct StageRingView: View {
 
     private func savedMessageRow(_ index: Int) -> some View {
         let preset = viewModel.presets[index]
-        let hasDraft = !viewModel.message.isEmpty
+        let hasDraft = viewModel.hasDraft
         let isOnDisplay = preset != nil && preset == viewModel.displayMessage
 
         return HStack(spacing: 10) {

@@ -6,7 +6,16 @@ import SwiftUI
     let sync: SyncManager
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     
-    var message: String = ""
+    /// The draft in the message box.
+    var message: String = "" {
+        didSet {
+            let hasText = !message.isEmpty
+            if hasText != hasDraft { hasDraft = hasText }
+        }
+    }
+    /// Whether there is a draft. Views that only care about this read it instead of
+    /// `message`, so they don't redraw on every keystroke.
+    private(set) var hasDraft = false
     /// What the speaker display shows. Lives on DisplayManager so a message sent
     /// from another synced iPad shows up here too.
     var displayMessage: String {
