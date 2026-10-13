@@ -136,7 +136,7 @@ enum HelpContent {
                         .paragraph(isGlass
                             ? "The bar under the preview fills as time passes. The small yellow mark shows where the wrap-up warning will start."
                             : "The ring fills clockwise as time passes. The yellow dot on the ring shows where the wrap-up warning will start."),
-                        .tip("The timer keeps counting accurately if you switch to another app."),
+                        .tip("The countdown stays accurate if you switch to another app, but the speaker display may stop updating until you come back, so keep the app open during a talk."),
                     ]),
                 ]
             ),
