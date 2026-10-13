@@ -184,6 +184,43 @@ struct WarningPulse: ViewModifier {
     }
 }
 
+/// Breathes the Zap button between red and yellow once time is up, so the operator
+/// notices they can nudge the speaker. With Reduce Motion it holds a steady red glow.
+struct ZapAttentionGlow<S: InsettableShape>: ViewModifier {
+    let isActive: Bool
+    let shape: S
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var phase = false
+
+    func body(content: Content) -> some View {
+        let color = phase ? SkinColor.yellow : SkinColor.red
+
+        content
+            .background {
+                if isActive {
+                    shape.fill(color.opacity(phase ? 0.35 : 0.22))
+                }
+            }
+            .overlay {
+                if isActive {
+                    shape.strokeBorder(color, lineWidth: 2)
+                }
+            }
+            .shadow(color: isActive ? color.opacity(phase ? 0.9 : 0.45) : .clear, radius: phase ? 16 : 8)
+            .task(id: isActive && !reduceMotion) {
+                guard isActive && !reduceMotion else {
+                    phase = false
+                    return
+                }
+                while !Task.isCancelled {
+                    withAnimation(.easeInOut(duration: 0.8)) { phase.toggle() }
+                    try? await Task.sleep(for: .milliseconds(800))
+                }
+            }
+    }
+}
+
 /// Shakes the message card when the operator presses Zap. Every card on screen
 /// (external display and operator preview) listens, so they shake together.
 struct ZapShake: ViewModifier {

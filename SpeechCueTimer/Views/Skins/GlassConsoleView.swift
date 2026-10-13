@@ -268,6 +268,11 @@ struct GlassConsoleView: View {
         .padding(22)
     }
 
+    /// Time is up and a message is on screen, so a Zap would reach the speaker.
+    private var zapNeedsAttention: Bool {
+        settings.isTimeUp && !viewModel.displayMessage.isEmpty
+    }
+
     private var messageSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -278,14 +283,16 @@ struct GlassConsoleView: View {
                 Button(action: viewModel.zapMessage) {
                     Label("Zap", systemImage: "bolt.fill")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SkinColor.purple)
+                        // White reads on the red/yellow glow; purple doesn't.
+                        .foregroundStyle(zapNeedsAttention ? Color.white : SkinColor.purple)
                         .padding(.horizontal, 14)
                         .frame(height: 40)
                         .skinWell(in: Capsule())
+                        .modifier(ZapAttentionGlow(isActive: zapNeedsAttention, shape: Capsule()))
                 }
                 .buttonStyle(SkinPressStyle())
                 .disabled(viewModel.displayMessage.isEmpty)
-                .accessibilityHint("Make the message shake on external display")
+                .accessibilityHint(zapNeedsAttention ? "Time is up. Make the message shake on external display" : "Make the message shake on external display")
             }
 
             if !viewModel.displayMessage.isEmpty {

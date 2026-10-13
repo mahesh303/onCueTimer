@@ -340,6 +340,11 @@ struct StageRingView: View {
         }
     }
 
+    /// Time is up and a message is on screen, so a Zap would reach the speaker.
+    private var zapNeedsAttention: Bool {
+        settings.isTimeUp && !viewModel.displayMessage.isEmpty
+    }
+
     private var messageTab: some View {
         VStack(alignment: .leading, spacing: 16) {
             MessageComposerField(
@@ -354,14 +359,16 @@ struct StageRingView: View {
                 Button(action: viewModel.zapMessage) {
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 20))
-                        .foregroundStyle(SkinColor.purple)
+                        // White reads on the red/yellow glow; purple doesn't.
+                        .foregroundStyle(zapNeedsAttention ? Color.white : SkinColor.purple)
                         .frame(width: 52, height: 52)
                         .skinWell(in: Circle())
+                        .modifier(ZapAttentionGlow(isActive: zapNeedsAttention, shape: Circle()))
                 }
                 .buttonStyle(SkinPressStyle())
                 .disabled(viewModel.displayMessage.isEmpty)
                 .accessibilityLabel("Zap")
-                .accessibilityHint("Make the message shake on external display")
+                .accessibilityHint(zapNeedsAttention ? "Time is up. Make the message shake on external display" : "Make the message shake on external display")
 
                 Button(action: viewModel.clearMessage) {
                     Image(systemName: "xmark")

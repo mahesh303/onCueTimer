@@ -23,7 +23,7 @@ struct SyncSettingsView: View {
                     Toggle("Sync with other iPads", isOn: $sync.isEnabled)
                         .tint(SkinColor.green)
                 } footer: {
-                    Text("Every iPad using the same show code shares the timer, the message on screen and the warning settings, and any of them can run the show. Skin, background and text size stay separate on each iPad.")
+                    Text("Every iPad using the same show code shares the timer, the message on screen, quick times, saved messages, text size and the warning settings, and any of them can run the show. Skin and background stay separate on each iPad.")
                 }
 
                 Section {

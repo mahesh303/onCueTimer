@@ -5,8 +5,9 @@ import XCTest
 final class SyncEngineTests: XCTestCase {
     private final class Device {
         let timerManager = TimerManager()
+        let fontSizeManager = FontSizeManager(scale: 1.0)
         lazy var displayManager = DisplayManager(timerManager: timerManager)
-        lazy var engine = SyncEngine(timerManager: timerManager, displayManager: displayManager)
+        lazy var engine = SyncEngine(timerManager: timerManager, displayManager: displayManager, fontSizeManager: fontSizeManager)
         let name: String
 
         init(_ name: String) {
@@ -152,7 +153,8 @@ final class SyncEngineTests: XCTestCase {
         let state = SyncState(
             totalSeconds: 120, remainingSeconds: 0,
             endDate: Date().addingTimeInterval(60 + skew),
-            warningThresholdSeconds: 60, pulseAnimationEnabled: true, stopsAtZero: false, message: ""
+            warningThresholdSeconds: 60, pulseAnimationEnabled: true, stopsAtZero: false, message: "",
+            timePresets: [:], savedMessages: [nil, nil, nil, nil], fontScale: 1.0
         )
         let envelope = SyncEnvelope(sentAt: Date().addingTimeInterval(skew), payload: .state(state, changedAt: Date().addingTimeInterval(skew)))
         b.engine.receive(try JSONEncoder().encode(envelope), from: "A")
@@ -173,5 +175,33 @@ final class SyncEngineTests: XCTestCase {
         wait(for: [zapped], timeout: 1)
 
         XCTAssertEqual(sentByB, 0)
+    }
+
+    func testPresetsSync() {
+        let a = makeDevice("A"), b = makeDevice("B")
+        link([a, b])
+
+        a.timerManager.setTime(seconds: 420)
+        a.timerManager.savePreset(number: 2)
+        a.displayManager.savedMessages[1] = "Two minutes"
+        settle()
+
+        XCTAssertEqual(b.timerManager.settings.presets[2], 420)
+        XCTAssertEqual(b.displayManager.savedMessages[1], "Two minutes")
+        XCTAssertEqual(b.displayManager.savedMessages[0], "Times up!")
+    }
+
+    func testTextSizeSyncs() {
+        let a = makeDevice("A"), b = makeDevice("B")
+        link([a, b])
+
+        a.fontSizeManager.increaseFontSize()
+        a.fontSizeManager.increaseFontSize()
+        settle()
+        XCTAssertEqual(b.fontSizeManager.currentScale, 1.2, accuracy: 0.001)
+
+        b.fontSizeManager.decreaseFontSize()
+        settle()
+        XCTAssertEqual(a.fontSizeManager.currentScale, 1.1, accuracy: 0.001)
     }
 }

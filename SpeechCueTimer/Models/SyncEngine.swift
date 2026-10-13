@@ -2,8 +2,8 @@
 //  SyncEngine.swift
 //  SpeechCueTimer
 //
-//  Keeps the timer, the on-screen message and the timer settings the same on every
-//  iPad in a show. Every device is equal: whichever one changed something last wins.
+//  Keeps the timer, the on-screen message, quick times, saved messages, text size
+//  and the timer settings the same on every iPad in a show. Every device is equal: whichever one changed something last wins.
 //  The transport (MultipeerConnectivity, see SyncManager) only moves bytes, so this
 //  logic can be tested with two engines wired straight to each other.
 //
@@ -11,8 +11,9 @@
 import Foundation
 import Observation
 
-/// Everything that is shared between devices. Skin, background colour and text
-/// size stay per device, since each iPad drives its own screen.
+/// Everything that is shared between devices. Skin and background colour stay
+/// per device, since each iPad drives its own screen.
+/// Both iPads need the same app version: a state from a different shape is ignored.
 struct SyncState: Codable, Equatable {
     var totalSeconds: Int
     /// Only meaningful while stopped; a running timer is described by `endDate`.
@@ -23,6 +24,11 @@ struct SyncState: Codable, Equatable {
     var pulseAnimationEnabled: Bool
     var stopsAtZero: Bool
     var message: String
+    /// Quick-time slots: slot number → seconds.
+    var timePresets: [Int: Int]
+    var savedMessages: [String?]
+    /// Speaker-display text size (A− / A+), 0.5 ... 2.0.
+    var fontScale: Double
 }
 
 struct SyncEnvelope: Codable {
@@ -51,6 +57,7 @@ final class SyncEngine: @unchecked Sendable {
 
     private let timerManager: TimerManager
     private let displayManager: DisplayManager
+    private let fontSizeManager: FontSizeManager
 
     /// Last state this device showed, whether changed here or received.
     private var lastState: SyncState?
@@ -64,9 +71,10 @@ final class SyncEngine: @unchecked Sendable {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init(timerManager: TimerManager, displayManager: DisplayManager) {
+    init(timerManager: TimerManager, displayManager: DisplayManager, fontSizeManager: FontSizeManager = .shared) {
         self.timerManager = timerManager
         self.displayManager = displayManager
+        self.fontSizeManager = fontSizeManager
         lastState = currentState()
         track()
 
@@ -92,7 +100,10 @@ final class SyncEngine: @unchecked Sendable {
             warningThresholdSeconds: settings.warningThresholdSeconds,
             pulseAnimationEnabled: settings.pulseAnimationEnabled,
             stopsAtZero: settings.stopsAtZero,
-            message: displayManager.message
+            message: displayManager.message,
+            timePresets: settings.presets,
+            savedMessages: displayManager.savedMessages,
+            fontScale: fontSizeManager.currentScale
         )
     }
 
@@ -171,6 +182,10 @@ final class SyncEngine: @unchecked Sendable {
 
         timerManager.applySyncedState(state, endDate: state.endDate?.addingTimeInterval(-clockOffset))
         displayManager.message = state.message
+        displayManager.savedMessages = state.savedMessages
+        if fontSizeManager.currentScale != state.fontScale {
+            fontSizeManager.currentScale = state.fontScale
+        }
         lastState = currentState()
     }
 

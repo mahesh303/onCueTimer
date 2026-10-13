@@ -52,6 +52,11 @@ import SwiftUI
         self.stopsAtZero = UserDefaults.standard.bool(forKey: "stopsAtZero")
     }
 
+    /// A countdown was set and has reached zero (or gone past it).
+    var isTimeUp: Bool {
+        totalSeconds > 0 && remainingSeconds <= 0
+    }
+
     func formatTime(_ seconds: Int) -> String {
         let absSeconds = abs(seconds)
         let h = absSeconds / 3600

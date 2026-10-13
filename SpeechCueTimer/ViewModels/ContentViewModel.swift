@@ -14,7 +14,11 @@ import SwiftUI
         set { displayManager.message = newValue }
     }
     var isTimerRunning: Bool = false
-    var presets: [String?] = Array(repeating: nil, count: 4)
+    /// Saved messages. Live on DisplayManager so they sync with other iPads.
+    var presets: [String?] {
+        get { displayManager.savedMessages }
+        set { displayManager.savedMessages = newValue }
+    }
 
     var isExternalDisplayConnected: Bool {
         displayManager.isExternalDisplayConnected
@@ -27,9 +31,16 @@ import SwiftUI
         self.sync = SyncManager(engine: SyncEngine(timerManager: timerManager, displayManager: displayManager))
 
         feedbackGenerator.prepare()
-        // Message presets are session-only (not persisted across launches).
-        presets = Array(repeating: nil, count: 4)
-        presets[0] = "Times up!" // Default message for preset 1
+        timerManager.onReachedZero = { [weak self] in self?.sendDraftAtZero() }
+    }
+
+    /// When time runs out, a message waiting in the message box goes straight to the
+    /// speaker display, so the operator can line it up while the talk is still running.
+    private func sendDraftAtZero() {
+        guard !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              message != displayMessage else { return }
+        displayMessage = message
+        feedbackGenerator.impactOccurred(intensity: 1.0)
     }
     
     // MARK: - Timer Controls

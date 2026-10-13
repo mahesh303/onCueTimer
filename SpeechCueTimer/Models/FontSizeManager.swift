@@ -7,9 +7,14 @@ import SwiftUI
     
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     
+    /// False for the throwaway instances tests create, so they don't overwrite the saved size.
+    private let persists: Bool
+
     var currentScale: Double {
         didSet {
-            UserDefaults.standard.set(currentScale, forKey: "externalDisplayFontScale")
+            if persists {
+                UserDefaults.standard.set(currentScale, forKey: "externalDisplayFontScale")
+            }
             NotificationCenter.default.post(
                 name: .fontScaleChanged,
                 object: currentScale
@@ -26,8 +31,15 @@ import SwiftUI
     }
     
     private init() {
+        persists = true
         let saved = UserDefaults.standard.double(forKey: "externalDisplayFontScale")
         self.currentScale = saved > 0 ? saved : 1.0
+    }
+
+    /// A separate, unsaved instance, so a test can simulate two devices in one process.
+    init(scale: Double) {
+        persists = false
+        currentScale = scale
     }
     
     func increaseFontSize() {

@@ -87,4 +87,35 @@ final class Phase15Tests: XCTestCase {
         XCTAssertTrue(categories.last!.emoji.contains("🇺🇸"))
         XCTAssertTrue(categories.flatMap(\.emoji).contains("❤️‍🔥"))
     }
+
+    // MARK: - Send the waiting message at zero
+
+    private func runOneSecondCountdown(draft: String, stopsAtZero: Bool = false) -> ContentViewModel {
+        let viewModel = ContentViewModel(timerManager: timerManager)
+        timerManager.settings.stopsAtZero = stopsAtZero
+        timerManager.setTime(seconds: 1)
+        viewModel.startTimer()
+        viewModel.message = draft
+
+        let expectation = XCTestExpectation(description: "Countdown reaches zero")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) { expectation.fulfill() }
+        wait(for: [expectation], timeout: 3.0)
+        return viewModel
+    }
+
+    func testWaitingMessageIsSentAtZero() {
+        let viewModel = runOneSecondCountdown(draft: "Please wrap up")
+        XCTAssertEqual(viewModel.displayMessage, "Please wrap up")
+        XCTAssertEqual(viewModel.message, "Please wrap up", "The draft stays in the box")
+    }
+
+    func testWaitingMessageIsSentWhenStoppingAtZero() {
+        let viewModel = runOneSecondCountdown(draft: "Time", stopsAtZero: true)
+        XCTAssertEqual(viewModel.displayMessage, "Time")
+    }
+
+    func testEmptyMessageBoxLeavesDisplayAlone() {
+        let viewModel = runOneSecondCountdown(draft: "  ")
+        XCTAssertEqual(viewModel.displayMessage, "")
+    }
 }
