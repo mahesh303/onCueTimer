@@ -44,10 +44,12 @@ import UIKit
         )
     }
     
+    // The app has no background modes (App Review only allows background audio for
+    // sound people can hear). iOS gives a short grace period here; after that the app
+    // is suspended, and the countdown, which is based on the clock, catches up on return.
     @objc private func appDidEnterBackground() {
         if settings.isRunning {
             startBackgroundTask()
-            BackgroundAudioManager.shared.startSilentAudio()
         }
     }
     
@@ -56,7 +58,6 @@ import UIKit
              // Force an immediate update upon returning to ensure UI is fresh
              updateTimer()
         }
-        BackgroundAudioManager.shared.stopSilentAudio()
         endBackgroundTask()
     }
     
@@ -122,7 +123,6 @@ import UIKit
         }
         targetDate = nil
         
-        BackgroundAudioManager.shared.stopSilentAudio()
         endBackgroundTask()
         
         settings.isRunning = false
@@ -197,7 +197,6 @@ import UIKit
         timer = nil
         targetDate = nil
 
-        BackgroundAudioManager.shared.stopSilentAudio()
         endBackgroundTask()
 
         settings.remainingSeconds = 0
@@ -240,7 +239,6 @@ import UIKit
             timer?.invalidate()
             timer = nil
             targetDate = nil
-            BackgroundAudioManager.shared.stopSilentAudio()
             endBackgroundTask()
 
             settings.isRunning = false
