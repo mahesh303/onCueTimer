@@ -2,8 +2,8 @@
 //  SyncEngine.swift
 //  SpeechCueTimer
 //
-//  Keeps the timer, the on-screen message and the timer settings the same on every
-//  iPad in a show. Every device is equal: whichever one changed something last wins.
+//  Keeps the timer, the on-screen message, quick times, saved messages, text size
+//  and the timer settings the same on every iPad in a show. Every device is equal: whichever one changed something last wins.
 //  The transport (MultipeerConnectivity, see SyncManager) only moves bytes, so this
 //  logic can be tested with two engines wired straight to each other.
 //

@@ -102,7 +102,7 @@ enum HelpContent {
                                 systemImage: "textformat.size",
                                 title: "A  100%  A",
                                 detail: (isGlass ? "At the top of the screen. " : "At the top of the right-hand panel. ")
-                                    + "Makes the timer and message on the speaker display smaller or larger, from 50% to 200%. The setting is remembered."
+                                    + "Makes the timer and message on the speaker display smaller or larger, from 50% to 200%. The setting is remembered, and with sync on it changes on every linked iPad."
                             ),
                         ]),
                     ]),
@@ -163,7 +163,7 @@ enum HelpContent {
                     ]),
                     HelpSection(heading: "Use a quick time", items: [
                         .paragraph("Tap a saved quick time to load it. The slot that matches the time on the clock is highlighted in blue. Quick times can't be loaded or saved while the timer runs."),
-                        .tip("Quick times and saved messages are cleared when the app is fully closed. Your warning, pulse, text size and skin settings are remembered."),
+                        .tip("Quick times and saved messages are cleared when the app is fully closed. With sync on, they come back from the other iPads when this one rejoins. Your warning, pulse, stop-at-zero, text size, skin and background settings are remembered."),
                     ]),
                 ]
             ),
@@ -257,8 +257,8 @@ enum HelpContent {
 
             HelpTopic(
                 id: "skins",
-                title: "Skins",
-                summary: "Switch between Glass Console and Stage Ring.",
+                title: "Skins and background",
+                summary: "Switch layouts and choose the background colour.",
                 systemImage: "paintpalette.fill",
                 tint: SkinColor.red,
                 sections: [
@@ -304,6 +304,10 @@ enum HelpContent {
                     HelpSection(heading: "What's shared", items: [
                         .paragraph("The timer, the message on the speaker display, Zap, quick times, saved messages, the text size, and the **Warn at**, **Pulse** and **Stop at zero** settings. Skin and background colour stay separate on each iPad."),
                         .paragraph("An iPad that joins later picks up the show that's already running."),
+                        .paragraph("The message box isn't shared: each iPad keeps its own draft. If a draft is waiting when time runs out, that iPad sends it, and it then appears on every linked iPad."),
+                    ]),
+                    HelpSection(heading: "Keep the app open", items: [
+                        .paragraph("An iPad leaves the show when the app goes to the background or the screen locks, and rejoins and catches up as soon as you come back. Its countdown keeps running in the meantime."),
                     ]),
                 ]
             ),
@@ -320,7 +324,8 @@ enum HelpContent {
                             HelpRow(title: "Start is greyed out", detail: "There's no time on the clock. Set a time or tap a quick time first."),
                             HelpRow(title: "I can't change the time", detail: "Setting the time and quick times are locked while the timer runs. Pause first."),
                             HelpRow(title: "The speaker display is blank, or the app says No display", detail: "Check the cable or screen mirroring. The app finds the screen automatically when it connects."),
-                            HelpRow(title: "My message disappeared", detail: "Starting the timer clears the message from the speaker display. Send it again after you press **Start**."),
+                            HelpRow(title: "My message disappeared", detail: "Starting the timer clears the message from the speaker display. Send it again after you press **Start**. With sync on, someone on a linked iPad may also have hidden or cleared it."),
+                            HelpRow(title: "A message went up on its own", detail: "It was waiting in the message box when the timer reached 00:00, so it was sent automatically. Clear the message box if you don't want that."),
                             HelpRow(title: "The Sync button stays yellow", detail: "It hasn't found another iPad yet. Check that every iPad uses the same show code, has Wi-Fi and Bluetooth turned on, and has the app open. If iOS asked about **Local Network** access, allow it under **Settings › Privacy & Security › Local Network**."),
                             HelpRow(title: "Zap does nothing", detail: "Zap only works while a message is on the speaker display."),
                             HelpRow(title: "The screen turned off during a talk", detail: "The iPad locked itself. Before an event, open the iPad's **Settings › Display & Brightness › Auto-Lock** and choose **Never**."),
