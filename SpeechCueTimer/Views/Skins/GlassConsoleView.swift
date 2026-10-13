@@ -11,7 +11,6 @@ import SwiftUI
 struct GlassConsoleView: View {
     let timerManager: TimerManager
     let viewModel: ContentViewModel
-    let showCursor: Bool
     @Binding var isKeyboardVisible: Bool
     let onOpenHelp: () -> Void
     let onOpenSettings: () -> Void
@@ -300,8 +299,7 @@ struct GlassConsoleView: View {
             }
 
             MessageComposerField(
-                message: viewModel.message,
-                showCursor: showCursor,
+                viewModel: viewModel,
                 isEditing: isKeyboardVisible,
                 onTap: { isKeyboardVisible = true }
             )
@@ -338,7 +336,7 @@ struct GlassConsoleView: View {
                         .skinFilled(SkinColor.actionBlue, in: Capsule())
                 }
                 .buttonStyle(SkinPressStyle())
-                .disabled(viewModel.message.isEmpty)
+                .disabled(!viewModel.hasDraft)
                 .accessibilityHint("Send the current message to display")
             }
         }
@@ -376,7 +374,7 @@ struct GlassConsoleView: View {
 
     private func savedMessageTile(_ index: Int) -> some View {
         let preset = viewModel.presets[index]
-        let hasDraft = !viewModel.message.isEmpty
+        let hasDraft = viewModel.hasDraft
         let shape = RoundedRectangle(cornerRadius: 14, style: .continuous)
 
         return Button {

@@ -166,13 +166,17 @@ struct SettingsRowIcon: View {
 
 /// Tappable area showing the message being typed. Tapping it opens the floating keyboard.
 struct MessageComposerField: View {
-    let message: String
-    let showCursor: Bool
+    /// Read here rather than passed in, so typing redraws this field and not the whole screen.
+    let viewModel: ContentViewModel
     let isEditing: Bool
     let onTap: () -> Void
 
+    /// Blinks here, for the same reason: it used to redraw the whole screen twice a second.
+    @State private var showCursor = false
+
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
+        let message = viewModel.message
 
         ScrollView {
             Group {
@@ -203,6 +207,14 @@ struct MessageComposerField: View {
         .accessibilityValue(message.isEmpty ? "No message" : message)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { onTap() }
+        .task(id: isEditing) {
+            showCursor = isEditing
+            guard isEditing else { return }
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                if !Task.isCancelled { showCursor.toggle() }
+            }
+        }
     }
 }
 
@@ -365,7 +377,7 @@ struct SavedMessageMenu: View {
         Button("Save current message here", systemImage: "square.and.arrow.down") {
             viewModel.savePreset(at: index)
         }
-        .disabled(viewModel.message.isEmpty)
+        .disabled(!viewModel.hasDraft)
 
         if viewModel.presets[index] != nil {
             Button("Send to display", systemImage: "arrow.up.circle") {
