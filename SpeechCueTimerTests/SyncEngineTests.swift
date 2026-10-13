@@ -169,7 +169,11 @@ final class SyncEngineTests: XCTestCase {
         b.engine.send = { _, _ in sentByB += 1 }
 
         // Every engine in this process hears every zap, so feed B one directly.
-        let zapped = expectation(forNotification: .messageZap, object: SyncEngine.remoteZapMarker)
+        // Match the marker by value: matching on `object:` compares identity, which
+        // iPadOS 18 doesn't preserve for bridged strings.
+        let zapped = expectation(forNotification: .messageZap, object: nil) { notification in
+            (notification.object as? String) == SyncEngine.remoteZapMarker
+        }
         let envelope = SyncEnvelope(sentAt: Date(), payload: .zap)
         b.engine.receive(try JSONEncoder().encode(envelope), from: "A")
         wait(for: [zapped], timeout: 1)
