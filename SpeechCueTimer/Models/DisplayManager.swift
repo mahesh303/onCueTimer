@@ -8,6 +8,9 @@ import UIKit
     var isAccessoryShowing = false
     let timerManager: TimerManager
     var message: String = ""
+    /// The four saved-message slots. Kept here next to `message` so SyncEngine can
+    /// share them; they last for the session only. The first slot starts with "Times up!".
+    var savedMessages: [String?] = ["Times up!", nil, nil, nil]
 
     var isExternalDisplayConnected: Bool {
         externalWindow != nil || isAccessoryShowing

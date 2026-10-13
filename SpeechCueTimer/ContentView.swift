@@ -11,8 +11,7 @@ import SwiftUI
 /// skins: the floating keyboard, the blinking cursor, and the Settings, Help and Sync sheets.
 struct ContentView: View {
     let timerManager: TimerManager
-    // @State ensures ContentViewModel is created once and SwiftUI tracks its @Observable changes.
-    // Previously stored as `let`, which prevented SwiftUI's observation system from subscribing.
+    // Owned by SpeechCueTimerApp so every window shares one view model (and one sync connection).
     @State private var viewModel: ContentViewModel
     @State private var isKeyboardVisible = false
     @State private var showCursor = false
@@ -21,10 +20,9 @@ struct ContentView: View {
     @State private var showSync = false
     @AppStorage(AppSkin.storageKey) private var skin: AppSkin = .glassConsole
 
-    init(timerManager: TimerManager) {
+    init(timerManager: TimerManager, viewModel: ContentViewModel) {
         self.timerManager = timerManager
-        // _viewModel wraps the @State storage directly so it is only allocated once.
-        _viewModel = State(initialValue: ContentViewModel(timerManager: timerManager))
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -137,5 +135,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(timerManager: TimerManager())
+    let timerManager = TimerManager()
+    return ContentView(timerManager: timerManager, viewModel: ContentViewModel(timerManager: timerManager))
 }

@@ -18,6 +18,10 @@ import UIKit
     var lastUsedDuration: Int = 0
     
     weak var displayManager: DisplayManager?
+
+    /// Called once when a running countdown reaches 00:00 (ContentViewModel uses it
+    /// to send a waiting message). Not called again while it carries on into overtime.
+    @ObservationIgnored var onReachedZero: (() -> Void)?
     
     init(settings: TimerSettings = TimerSettings()) {
         self.settings = settings
@@ -157,9 +161,11 @@ import UIKit
         // Usually timers stay on "10" for the first second. So ceil is correct for visual "10... 9...".
         
         let ceilSeconds = Int(ceil(timeLeft))
+        let reachedZero = settings.remainingSeconds > 0 && ceilSeconds <= 0
 
         if ceilSeconds <= 0 && settings.stopsAtZero {
             stopAtZero()
+            if reachedZero { onReachedZero?() }
             return
         }
 
@@ -180,6 +186,8 @@ import UIKit
             
             // Notify external display
             NotificationCenter.default.post(name: .timerStateChanged, object: nil)
+
+            if reachedZero { onReachedZero?() }
         }
     }
 
@@ -209,6 +217,7 @@ import UIKit
         settings.pulseAnimationEnabled = state.pulseAnimationEnabled
         settings.stopsAtZero = state.stopsAtZero
         settings.totalSeconds = state.totalSeconds
+        settings.presets = state.timePresets
         activePresetNumber = nil
 
         if let endDate {

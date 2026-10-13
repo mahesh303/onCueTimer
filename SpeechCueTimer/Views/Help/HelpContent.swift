@@ -196,8 +196,11 @@ enum HelpContent {
                                 detail: (isGlass ? "" : "The **×** button. ")
                                     + "Erases what you typed and removes the message from the speaker display."
                             ),
-                            HelpRow(systemImage: "bolt.fill", title: "Zap", detail: "Shakes the message on the speaker display to catch the speaker's eye. Only available while a message is showing."),
+                            HelpRow(systemImage: "bolt.fill", title: "Zap", detail: "Shakes the message on the speaker display to catch the speaker's eye. Only available while a message is showing. When time runs out, the Zap button glows red and yellow as a reminder."),
                         ]),
+                    ]),
+                    HelpSection(heading: "Send automatically at zero", items: [
+                        .paragraph("Type a message while the talk is running and leave it in the message box. When the timer reaches 00:00, it goes to the speaker display on its own. If the box is empty, nothing changes."),
                     ]),
                     HelpSection(heading: "The keyboard", items: [
                         .paragraph("Word suggestions appear above the keys as you type. The smiley key opens every emoji, sorted into categories like the iPad's own keyboard. The clock tab keeps the ones you've used recently. Tap **Done**, or anywhere outside the keyboard, to close it."),
@@ -299,7 +302,7 @@ enum HelpContent {
                         .tip("Give each iPad a name under **This iPad**, such as FOH or Stage left, so you can tell them apart in the list."),
                     ]),
                     HelpSection(heading: "What's shared", items: [
-                        .paragraph("The timer, the message on the speaker display, Zap, and the **Warn at**, **Pulse** and **Stop at zero** settings. Skin, background colour, text size and saved messages stay separate on each iPad."),
+                        .paragraph("The timer, the message on the speaker display, Zap, quick times, saved messages, the text size, and the **Warn at**, **Pulse** and **Stop at zero** settings. Skin and background colour stay separate on each iPad."),
                         .paragraph("An iPad that joins later picks up the show that's already running."),
                     ]),
                 ]
